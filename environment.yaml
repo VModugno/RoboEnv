@@ -19,3 +19,4 @@ dependencies:
 - catkin_tools
 - pinocchio
 - pybullet
+- robot_descriptions
