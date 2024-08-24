@@ -16,7 +16,7 @@ Welcome to **RoboEnv**, a repository designed to manage and set up the environme
 To get started with **RoboEnv**, you need to have the following software installed on your system:
 
 - **Git**: Version control system to clone repositories.
-- **Conda**: Package manager for managing environments.
+- **Conda/Mamba**: Package manager for managing environments. Mamba is a fast, flexible, and user-friendly package manager. If you don't have Mamba installed, follow the installation instructions available [here](https://github.com/conda-forge/miniforge). once mamba is istalled move to the next section.
 
 ### Setting Up the Environment
 
