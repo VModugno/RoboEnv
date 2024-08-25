@@ -1,0 +1,51 @@
+{	
+    "sim": {
+        "time_step": 0.001,
+        "experiment_duration": 5,
+        "FL": [["FL_foot","FL_foot_fixed"]],
+        "FR": [["FR_foot","FR_foot_fixed"]],
+        "RL": [["RL_foot","RL_foot_fixed"]],
+        "RR": [["RR_foot","RR_foot_fixed"]],
+        "feet_contact_names": [["FR_foot","FL_foot","RL_foot","RR_foot"]]
+    },
+    
+    
+    "robot_pybullet": {
+        "base_type": ["fixed"],
+        "collision_enable": [0],
+        "robot_description_model":[""],
+        "urdf_path": ["elephant_description/mycobot_280_pi.urdf"],
+        "ros_urdf_path": "",
+        "init_link_base_position": [[0, 0, 0.03]],
+        "init_link_base_vel": [[0.0, 0.0, 0.0]],
+        "init_link_base_orientation": [[0.0, 0.0, 0.0, 1]],
+        "init_link_base_ang_vel": [[0.0, 0.0, 0.0]],
+        "init_motor_angles": [[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]],
+        "init_motor_vel":[[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]],
+        "motor_offset": [[]],
+        "motor_direction": [[]],
+        "motor_friction": [0],
+        "motor_friction_coeff": [0],
+        "foot_friction": [2],
+        "foot_restitution": [0],
+        "enable_feet_joint_force_sensors": [["RL_foot_fixed", "RR_foot_fixed", "FL_foot_fixed", "FR_foot_fixed"]],
+        "floating_base_name": ["floating_base"],
+        "servo_pos_gains": [400],
+        "servo_vel_gains": [3]
+    },
+
+    "env_pybullet": {
+        "env_script_name": ""
+    },
+
+    "robot_pin": {
+        "base_type": ["fixed"],
+        "robot_description_model": [""],
+        "urdf_path": ["elephant_description/mycobot_280_pi.urdf"],
+        "ros_urdf_path": [""],
+        "floating_base_name": ["floating_base"],
+        "joint_state_conversion_active": [1]
+    }
+  
+    
+}
