@@ -20,3 +20,5 @@ dependencies:
 - pinocchio
 - pybullet
 - robot_descriptions
+- gepetto-viewer-corba
+
