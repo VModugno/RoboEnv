@@ -20,7 +20,7 @@
         "init_link_base_vel": [[0.0, 0.0, 0.0]],
         "init_link_base_orientation": [[0.0, 0.0, 0.0, 1]],
         "init_link_base_ang_vel": [[0.0, 0.0, 0.0]],
-        "init_motor_angles": [[0.0, 1.5, -1.0, -0.54, 0.0, 0.0, 0.0]],
+        "init_motor_angles": [[0.0000, 1.0323, 0.0000, 0.8247, 0.0000, 1.57, 0.0000]],
         "init_motor_vel":[[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]],
         "motor_offset": [[]],
         "motor_direction": [[]],

@@ -17,6 +17,11 @@
       </geometry>
       <origin xyz = "0.0 0 -0.03" rpy = "0 0 1.5708"/>
     </collision>
+    <inertial>
+      <mass value="0.2"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+      <origin xyz="0 0 -0.015" rpy="0 0 0"/>
+    </inertial>
   </link>
 
   <link name="joint1">
@@ -34,6 +39,11 @@
       </geometry>
     <origin xyz = "0.0 0 0 " rpy = " 0 0 0"/>
     </collision>
+    <inertial>
+      <mass value="0.2"/>
+      <inertia ixx="0.00005" ixy="0" ixz="0" iyy="0.00005" iyz="0" izz="0.00005"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </inertial>
   </link>
 
   <link name="joint2">
@@ -49,13 +59,17 @@
       </geometry>
     <origin xyz = "0.0 0 -0.06096 " rpy = " 0 0 -1.5708"/>
     </collision>
+    <inertial>
+      <mass value="0.2"/>
+      <inertia ixx="0.00005" ixy="0" ixz="0" iyy="0.00005" iyz="0" izz="0.00005"/>
+      <origin xyz="0 0 -0.03048" rpy="0 0 0"/>
+    </inertial>
   </link>
 
 
   <link name="joint3">
     <visual>
       <geometry>
-       
        <mesh filename="joint3.dae"/>
       </geometry>
     <origin xyz = "0.0 0 0.03256 " rpy = " 0 -1.5708 0"/>
@@ -66,6 +80,11 @@
       </geometry>
     <origin xyz = "0.0 0 0.03256 " rpy = " 0 -1.5708 0"/>
     </collision>
+     <inertial>
+      <mass value="0.2"/>
+      <inertia ixx="0.00005" ixy="0" ixz="0" iyy="0.00005" iyz="0" izz="0.00005"/>
+      <origin xyz="0 0 0.01628" rpy="0 0 0"/>
+    </inertial>
   </link>
 
 
@@ -84,6 +103,11 @@
       </geometry>
     <origin xyz = "0.0 0 0.03056 " rpy = " 0 -1.5708 0"/>
     </collision>
+     <inertial>
+      <mass value="0.2"/>
+      <inertia ixx="0.00005" ixy="0" ixz="0" iyy="0.00005" iyz="0" izz="0.00005"/>
+      <origin xyz="0 0 0.01528" rpy="0 0 0"/>
+    </inertial>
   </link>
 
 
@@ -104,6 +128,11 @@
       </geometry>
     <origin xyz = "0.0 0 -0.03356 " rpy = " 0 -1.5708 1.5708"/>
     </collision>
+    <inertial>
+      <mass value="0.2"/>
+      <inertia ixx="0.00005" ixy="0" ixz="0" iyy="0.00005" iyz="0" izz="0.00005"/>
+      <origin xyz="0 0 -0.01678" rpy="0 0 0"/>
+    </inertial>
   </link>
 
 
@@ -122,6 +151,11 @@
       </geometry>
     <origin xyz = "0 0.00 -0.038 " rpy = " 0 0 0"/>
     </collision>
+     <inertial>
+      <mass value="0.2"/>
+      <inertia ixx="0.00005" ixy="0" ixz="0" iyy="0.00005" iyz="0" izz="0.00005"/>
+      <origin xyz="0 0 -0.019" rpy="0 0 0"/>
+    </inertial>
   </link>
 
 
@@ -140,6 +174,11 @@
       </geometry>
     <origin xyz = "0.0 0 -0.012 " rpy = " 0 0 0"/>
     </collision>
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="0.00002" ixy="0" ixz="0" iyy="0.00002" iyz="0" izz="0.00002"/>
+      <origin xyz="0 0 -0.006" rpy="0 0 0"/>
+    </inertial>
   </link>
 
 
