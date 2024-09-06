@@ -1,0 +1,24 @@
+name: robo_env
+channels:
+- conda-forge
+- robostack-staging
+dependencies:
+- python=3.9
+- pip
+- casadi
+- numpy
+- matplotlib
+- rospkg
+- urdfdom
+- ros-noetic-ros-base
+- ros-noetic-tf2-msgs
+- ros-noetic-rviz
+- ros-noetic-joint-state-publisher
+- ros-noetic-joint-state-publisher-gui
+- ros-noetic-xacro
+- catkin_tools
+- pinocchio
+- pybullet
+- robot_descriptions
+- gepetto-viewer-corba
+
