@@ -31,7 +31,9 @@
         "enable_feet_joint_force_sensors": [["RL_foot_fixed", "RR_foot_fixed", "FL_foot_fixed", "FR_foot_fixed"]],
         "floating_base_name": ["floating_base"],
         "servo_pos_gains": [400],
-        "servo_vel_gains": [3]
+        "servo_vel_gains": [3],
+        "delay_measure_flag":[0],
+        "delay_measure_steps":[3]
     },
 
     "env_pybullet": {
