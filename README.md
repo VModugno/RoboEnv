@@ -23,9 +23,10 @@ To get started with **RoboEnv**, you need to have the following software install
 1. **Clone the `roboenv` Repository:**
 
    ```bash
-   git clone https://github.com/yourusername/roboenv.git
+   git clone --recurse-submodules https://github.com/yourusername/roboenv.git
    cd roboenv
    ```
+
 2.  **Install the Conda Environment:**
 
     The environment.yaml file includes all the dependencies required for the simulation and control projects. To create the environment, run:
@@ -35,3 +36,9 @@ To get started with **RoboEnv**, you need to have the following software install
 3. **Activate the Environment:**
     ```bash
     conda activate roboenv
+    ```
+
+4. **Pull Submodule (if you already cloned the repository without the submodules):**
+    ```bash
+    git submodule update --init --recursive
+    ```
