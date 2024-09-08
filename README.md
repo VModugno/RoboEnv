@@ -35,7 +35,7 @@ To get started with **RoboEnv**, you need to have the following software install
     ```
 3. **Activate the Environment:**
     ```bash
-    conda activate roboenv
+    conda activate robo_env
     ```
 
 4. **Pull Submodule (if you already cloned the repository without the submodules):**
