@@ -6,7 +6,6 @@ channels:
 dependencies:
 - python=3.10
 - pip
-- build
 - casadi
 - numpy
 - matplotlib
