@@ -1,4 +1,4 @@
-name: robo_env
+name: robo_env2
 channels:
 - conda-forge
 - robostack-staging
