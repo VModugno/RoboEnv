@@ -30,7 +30,7 @@ To get started with **RoboEnv**, you need to have the following software install
 
     The environment.yaml file includes all the dependencies required for the simulation and control projects. To create the environment, run:
     ```bash
-    mamba env create -f environment.yaml
+    mamba env create -f environment_ros2.yaml
     ```
 3. **Activate the Environment:**
     ```bash
