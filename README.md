@@ -29,13 +29,23 @@ To get started with **RoboEnv**, you need to have the following software install
 
 2.  **Install the Conda Environment:**
 
-    The environment.yaml file includes all the dependencies required for the simulation and control projects. To create the environment, run:
+    The environment.yaml file includes all the dependencies required for the simulation and control projects. To create the environment, run the below commands.
     ```bash
-    mamba env create -f environment.yaml
+    mamba env create -f environment_ros2.yaml
+    mamba env activate roboenv2
     ```
+
+    From here, there is a bug with ros2 and the new version of setuptools (see [here](https://github.com/colcon/colcon-python-setup-py/issues/41)). To build python ros2 packages, we need to replace some code in one of the python files in the mamba environment. There is a command to do this in Linux automatically below. You can run that. If you have trouble, look below this command.
+    
+    ```bash
+    python -m site | grep -E miniforge3/envs.*?/lib/python3.11/site-packages | sed "s:,::g; s:\s::g; s:'::g" | awk '{print $1"/colcon_python_setup_py/package_identification/python_setup_py.py"}' | xargs sed -i -e "s/'from setuptools.extern.packaging.specifiers import SpecifierSet'/'from packaging.specifiers import SpecifierSet'/g"
+    ```
+
+    If you have trouble with the prior command, edit the file in a location similar to `/home/mz/miniforge3/envs/robo_env2_vm/lib/python3.11/site-packages/colcon_python_setup_py/package_identification/python_setup_py.py` and change the line with `'from setuptools.extern.packaging.specifiers import SpecifierSet'` to `'from packaging.specifiers import SpecifierSet'`.
+
 3. **Activate the Environment:**
     ```bash
-    conda activate robo_env
+    conda activate roboenv2
     ```
 
 4. **Pull Submodule (if you already cloned the repository without the submodules):**

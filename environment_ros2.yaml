@@ -1,0 +1,26 @@
+name: roboenv2
+channels:
+- conda-forge
+- robostack-staging
+dependencies:
+- python
+- pip
+- casadi
+- numpy
+- matplotlib
+- rospkg
+- urdfdom
+- ros-humble-ros-base
+- ros-humble-tf2-msgs
+- ros-humble-rviz2
+- ros-humble-joint-state-publisher
+- ros-humble-joint-state-publisher-gui
+- ros-humble-xacro
+- cmake
+- pkg-config
+- make
+- ninja
+- colcon-common-extensions
+- pinocchio
+- pybullet
+- robot_descriptions
