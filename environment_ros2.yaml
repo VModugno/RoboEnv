@@ -1,25 +1,26 @@
-name: robo_env2
+name: roboenv2
 channels:
 - conda-forge
 - robostack-staging
-- robostack-humble
 dependencies:
-- python=3.11
+- python
 - pip
 - casadi
 - numpy
 - matplotlib
 - rospkg
 - urdfdom
-- ros-humble-desktop-full
+- ros-humble-ros-base
+- ros-humble-tf2-msgs
+- ros-humble-rviz2
+- ros-humble-joint-state-publisher
+- ros-humble-joint-state-publisher-gui
+- ros-humble-xacro
 - cmake
 - pkg-config
 - make
 - ninja
 - colcon-common-extensions
-- catkin_tools
-- pinocchio=3.2.*
+- pinocchio
 - pybullet
 - robot_descriptions
-- gepetto-viewer
-
