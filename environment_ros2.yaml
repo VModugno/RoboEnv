@@ -16,7 +16,10 @@ dependencies:
 - ros-humble-joint-state-publisher
 - ros-humble-joint-state-publisher-gui
 - ros-humble-xacro
-- ros-humble*-image-transport*
+- ros-humble-image-transport
+- ros-humble-image-transport-plugins
+- ros-humble-compressed-depth-image-transport
+- ros-humble-compressed-image-transport
 - cmake
 - pkg-config
 - make
