@@ -23,16 +23,18 @@ To get started with **RoboEnv**, you need to have the following software install
 1. **Clone the `roboenv` Repository:**
 
    ```bash
-   git clone --recurse-submodules https://github.com/yourusername/roboenv.git
-   cd roboenv
+   git clone --recurse-submodules https://github.com/VModugno/RoboEnv.git
+   cd RoboEnv
    ```
 
-2.  **Install the Conda Environment:**
+2.  **Install the Conda Environment and the simulation_and_control library:**
 
     The environment.yaml file includes all the dependencies required for the simulation and control projects. To create the environment, run the below commands.
     ```bash
     mamba env create -f environment_ros2.yaml
     mamba env activate roboenv2
+    cd simulation_and_control
+    pip install .
     ```
 
     From here, there is a bug with ros2 and the new version of setuptools (see [here](https://github.com/colcon/colcon-python-setup-py/issues/41)). To build python ros2 packages, we need to replace some code in one of the python files in the mamba environment. There is a command to do this in Linux automatically below. You can run that. If you have trouble, look below this command.
