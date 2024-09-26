@@ -37,7 +37,7 @@ To get started with **RoboEnv**, you need to have the following software install
     pip install .
     ```
 
-3.  **Using Simulator**
+3.  **Using the Simulator**
     
     in order to use the simulator you need to copy inside the folder containing you main.py script the configs and models folder which can be found in this repository
 
