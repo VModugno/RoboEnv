@@ -37,7 +37,20 @@
         "servo_pos_gains": [400],
         "servo_vel_gains": [3],
         "delay_measure_flag":[0],
-        "delay_measure_steps":[3]
+        "delay_measure_steps":[3],
+        "noise_flag":[0],
+        "robot_noise":[
+                {
+                    "joint_cov": 0.0001,
+                    "joint_vel_cov": 0.0001,
+                    "joint_acc_cov": 0.0001,
+                    "base_pos_cov": 0.0001,
+                    "base_ori_cov": 0.0001,
+                    "base_lin_vel_cov": 0.0001,
+                    "base_ang_vel_cov": 0.0001,
+                    "joint_torque_cov":0.0001
+                }
+        ]
     },
 
     "env_pybullet": {
