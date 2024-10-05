@@ -16,7 +16,7 @@
         "robot_description_model":[""],
         "urdf_path": ["elephant_description/mycobot_280_pi.urdf"],
         "ros_urdf_path": "",
-        "init_link_base_position": [[0, 0, 0.03]],
+        "init_link_base_position": [[0, 0, 0.0]],
         "init_link_base_vel": [[0.0, 0.0, 0.0]],
         "init_link_base_orientation": [[0.0, 0.0, 0.0, 1]],
         "init_link_base_ang_vel": [[0.0, 0.0, 0.0]],

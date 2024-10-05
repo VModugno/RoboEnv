@@ -3,25 +3,10 @@
 	
 <xacro:property name="width" value=".2" />
 
+  <link name="robot_base">
+  </link>
 
   <link name="g_base">
-    <visual>
-      <geometry>
-        <mesh filename="G_base_new.dae"/>
-      </geometry>
-      <origin xyz = "0.0 0 -0.03" rpy = "0 0 1.5708"/>
-    </visual>
-    <collision>
-      <geometry>
-        <mesh filename="G_base_new.dae"/>
-      </geometry>
-      <origin xyz = "0.0 0 -0.03" rpy = "0 0 1.5708"/>
-    </collision>
-    <inertial>
-      <mass value="0.2"/>
-      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
-      <origin xyz="0 0 -0.015" rpy="0 0 0"/>
-    </inertial>
   </link>
 
   <link name="joint1">
@@ -181,15 +166,22 @@
     </inertial>
   </link>
 
+  <link name="gripper">
+  </link>
+
+  <joint name="robot_base_to_g_base" type="fixed">
+    <parent link="robot_base"/>
+    <child link="g_base"/>
+    <origin xyz= "0 0 0.003" rpy = "0 0 0"/>  
+  </joint>
 
   <joint name="g_base_to_joint1" type="fixed">
     <axis xyz="0 0 0"/>
     <limit effort = "1000.0" lower = "-3.14" upper = "3.14159" velocity = "0"/>
     <parent link="g_base"/>
     <child link="joint1"/>
-    <origin xyz= "0 0 0" rpy = "0 0 0"/>  
+    <origin xyz= "0 0 0.026" rpy = "0 0 0"/>  
   </joint>
-
 
   <joint name="joint2_to_joint1" type="revolute">
     <axis xyz="0 0 1"/>
@@ -199,7 +191,6 @@
     <origin xyz= "0 0 0.13956" rpy = "0 0 0"/>  
   </joint>
 
-
   <joint name="joint3_to_joint2" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort = "1000.0" lower = "-3.14" upper = "3.14159" velocity = "0"/>
@@ -208,7 +199,6 @@
     <origin xyz= "0 0 -0.001" rpy = "0 1.5708 -1.5708"/>  
   </joint>
 
-
   <joint name="joint4_to_joint3" type="revolute">
     <axis xyz=" 0 0 1"/>
     <limit effort = "1000.0" lower = "-3.14" upper = "3.14159" velocity = "0"/>
@@ -216,8 +206,6 @@
     <child link="joint4"/>
     <origin xyz= "  -0.1104 0 0   " rpy = "0 0 0"/>  
   </joint>
-
-
 
   <joint name="joint5_to_joint4" type="revolute">
     <axis xyz=" 0 0 1"/>
@@ -243,7 +231,12 @@
     <origin xyz= "0 0.0456 0" rpy = "-1.5708 0 0"/>  
   </joint>
 
-
+  <!--- we can't mount the gripper with no rotation, we mount it with 30 degrees -->
+  <joint name="joint6output_to_gripper" type="fixed">
+    <parent link="joint6_flange"/>
+    <child link="gripper"/>
+    <origin xyz= "0 0 0.1" rpy = "0 0 -0.5236"/>  
+  </joint>
 
 </robot>
 
