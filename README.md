@@ -39,7 +39,7 @@ To get started with **RoboEnv**, you need to have the following software install
 
 3.  **Using the Simulator**
     
-    in order to use the simulator you need to copy inside the folder containing you main.py script the configs and models folder which can be found in this repository
+   To ensure the simulator functions correctly, please copy the 'configs' and 'models' folders from the 'roboenv' environment into the same directory as your script. This directory is where your project's executable code is stored. The 'configs' folder contains essential configuration files that set the operational parameters for the simulator, while the 'models' folder includes the data models necessary for simulation. Placing these folders in the same directory as your script ensures that when the simulator runs, it can easily access and utilize these crucial resources, leading to a seamless operation
 
 4.  **Connecting to the real elephant robot**  
     
