@@ -63,7 +63,16 @@ To get started with **RoboEnv**, you need to have the following software install
     git submodule update --init --recursive
     ```
 8. Windows: Install Windows Build Tools--if on windows
-   `mamba install vs2019_win-64`
+```
+# Install Visual Studio 2017, 2019 or 2022 with C++ support 
+# see https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=msvc-160
+
+# Install the Visual Studio command prompt - if you use Visual Studio 2019:
+mamba install vs2019_win-64
+
+# Install the Visual Studio command prompt - if you use Visual Studio 2022:
+mamba install vs2022_win-64
+```
 
 ## Troubleshooting
 
