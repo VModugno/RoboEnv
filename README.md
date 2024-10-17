@@ -76,20 +76,29 @@ mamba install vs2022_win-64
 
 ## Troubleshooting
 
+### All Operating Systems
 If you get an error like
 ```
 CMake Error at /home/niels/opt/miniforge3/envs/roboenv2/share/cmake-3.29/Modules/FindPackage
 ...
 Could NOT find Python3 (missing: Python3_NumPy_INCLUDE_DIRS NumPy)
 ...
+
 ```
 Try building your code with this flag. There seems to be some trouble with mamba and virtual environments for some people.
 ```
 colcon build --cmake-args -D Python3_FIND_VIRTUALENV=ONLY
 ```
 
+Also note that if you get a weird error with CMAKE with indices, check that none of your paths have a chinese character in them.
+
 Windows:
 Note that on windows you will need to `.\setup.bat` instead of source `install/setup.bash` when building. Also note you shouldn't use powershell, instead use command prompt or anaconda prompt.
+WSL: use WSL 2
+If doing native robostack, then you need to install visual studio 2019 or 2022 before you run the mamba install command.
 
 Mac:
 Note that you will need to do the `.\setup.zsh` instead of `install/setup.bash` when building, or whatever your default shell is.
+Note also that clion can cause issues with the cmake in the virtual environmnet. You may need to re-install clion.
+
+
