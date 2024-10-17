@@ -80,7 +80,7 @@ colcon build --cmake-args -D Python3_FIND_VIRTUALENV=ONLY
 ```
 
 Windows:
-Note that on windows you will need to `.\setup.bat` instead of source `install/setup.bash` when building.
+Note that on windows you will need to `.\setup.bat` instead of source `install/setup.bash` when building. Also note you shouldn't use powershell, instead use command prompt or anaconda prompt.
 
 Mac:
 Note that you will need to do the `.\setup.zsh` instead of `install/setup.bash` when building, or whatever your default shell is.
