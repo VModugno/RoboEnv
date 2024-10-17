@@ -51,19 +51,23 @@ To get started with **RoboEnv**, you need to have the following software install
 
     If you have trouble with the prior command, edit the file in a location similar to `/home/mz/miniforge3/envs/robo_env2_vm/lib/python3.11/site-packages/colcon_python_setup_py/package_identification/python_setup_py.py` and change the line with `'from setuptools.extern.packaging.specifiers import SpecifierSet'` to `'from packaging.specifiers import SpecifierSet'`.
 
-5. **Activate the Environment:**
+    On windows this may be in the directory `C:\Users\ACER\.conda\envs\roboenv2\Lib\site-packages\colcon_python_setup_py\package_identification`.
+
+6. **Activate the Environment:**
     ```bash
     conda activate roboenv2
     ```
 
-6. **Pull Submodule (if you already cloned the repository without the submodules):**
+7. **Pull Submodule (if you already cloned the repository without the submodules):**
     ```bash
     git submodule update --init --recursive
     ```
-7. Install Windows Build Tools--if on windows
+8. Windows: Install Windows Build Tools--if on windows
    ```
 mamba install vs2019_win-64
    ```
+
+Note that on windows you will need to `.\setup.bat` instead of source `install/setup.bash` when building.
 
 ## Troubleshooting
 
