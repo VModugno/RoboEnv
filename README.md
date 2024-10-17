@@ -67,8 +67,6 @@ To get started with **RoboEnv**, you need to have the following software install
 mamba install vs2019_win-64
    ```
 
-Note that on windows you will need to `.\setup.bat` instead of source `install/setup.bash` when building.
-
 ## Troubleshooting
 
 If you get an error like
@@ -82,3 +80,9 @@ Try building your code with this flag. There seems to be some trouble with mamba
 ```
 colcon build --cmake-args -D Python3_FIND_VIRTUALENV=ONLY
 ```
+
+Windows:
+Note that on windows you will need to `.\setup.bat` instead of source `install/setup.bash` when building.
+
+Mac:
+Note that you will need to do the `.\setup.zsh` instead of `install/setup.bash` when building, or whatever your default shell is.
