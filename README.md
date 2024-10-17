@@ -60,6 +60,10 @@ To get started with **RoboEnv**, you need to have the following software install
     ```bash
     git submodule update --init --recursive
     ```
+7. Install Windows Build Tools--if on windows
+   ```
+mamba install vs2019_win-64
+   ```
 
 ## Troubleshooting
 
