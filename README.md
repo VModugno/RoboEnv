@@ -90,7 +90,7 @@ Try building your code with this flag. There seems to be some trouble with mamba
 colcon build --cmake-args -D Python3_FIND_VIRTUALENV=ONLY
 ```
 
-Also note that if you get a weird error with CMAKE with indices, check that none of your paths have a chinese character in them.
+Also note that if you get a weird error with CMAKE with indices, check that none of your paths have a chinese character in them. https://blog.csdn.net/weixin_45753396/article/details/129050343
 
 ### Windows:
 Note that on windows you will need to `.\setup.bat` instead of source `install/setup.bash` when building. Also note you shouldn't use powershell, instead use command prompt or anaconda prompt.
