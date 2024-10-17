@@ -60,3 +60,17 @@ To get started with **RoboEnv**, you need to have the following software install
     ```bash
     git submodule update --init --recursive
     ```
+
+## Troubleshooting
+
+If you get an error like
+```
+CMake Error at /home/niels/opt/miniforge3/envs/roboenv2/share/cmake-3.29/Modules/FindPackage
+...
+Could NOT find Python3 (missing: Python3_NumPy_INCLUDE_DIRS NumPy)
+...
+```
+Try building your code with this flag. There seems to be some trouble with mamba and virtual environments for some people.
+```
+colcon build --cmake-args -D Python3_FIND_VIRTUALENV=ONLY
+```
