@@ -92,12 +92,12 @@ colcon build --cmake-args -D Python3_FIND_VIRTUALENV=ONLY
 
 Also note that if you get a weird error with CMAKE with indices, check that none of your paths have a chinese character in them.
 
-Windows:
+### Windows:
 Note that on windows you will need to `.\setup.bat` instead of source `install/setup.bash` when building. Also note you shouldn't use powershell, instead use command prompt or anaconda prompt.
 WSL: use WSL 2
 If doing native robostack, then you need to install visual studio 2019 or 2022 before you run the mamba install command.
 
-Mac:
+### Mac:
 Note that you will need to do the `.\setup.zsh` instead of `install/setup.bash` when building, or whatever your default shell is.
 Note also that clion can cause issues with the cmake in the virtual environmnet. You may need to re-install clion.
 
