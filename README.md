@@ -36,7 +36,18 @@ To get started with **RoboEnv**, you need to have the following software install
     cd simulation_and_control
     pip install .
     ```
-
+   1. **Extra Installation Steps for windows user**
+   after installing the enviroment roboenv2 the windows user have to perform some extra steps to get ros/ros2 compilation working properly. They have to install visual studio 2022 and ensure that during the installation process the c/c++ for desktop development package is selected. After this in the roboenv2 they need to install 2 more packages
+   ```bash
+   mamba install compilers
+   mamba install mamba install vs2022_win-64
+   ``` 
+   after this they have to options: from the search bar the can open the developer prompt activate the mamba/conda env and work from there to run colcon build or they can open up the miniforge prompt and check if the visual studio dependecies is correctly referenced by typing 
+   ```bash
+   where cl.exe
+   ```
+   if this command return the path to visual code compiler then they are good to go also with
+   the miniforge prompt
 3.  **Using the Simulator**
     
    To ensure the simulator functions correctly, please copy the 'configs' and 'models' folders from the 'roboenv' environment into the same directory as your script. This directory is where your project's executable code is stored. The 'configs' folder contains essential configuration files that set the operational parameters for the simulator, while the 'models' folder includes the data models necessary for simulation. Placing these folders in the same directory as your script ensures that when the simulator runs, it can easily access and utilize these crucial resources, leading to a seamless operation
