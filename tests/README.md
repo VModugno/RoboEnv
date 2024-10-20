@@ -1,0 +1,1 @@
+in this folder we place all the test to check urdf and to have minimal example if necessary
