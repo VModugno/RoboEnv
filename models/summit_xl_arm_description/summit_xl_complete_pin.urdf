@@ -54,12 +54,12 @@
   <!-- DOCKING LINK -->
   <link name="robot_base_docking_contact_link"/>
   <!--WHEEL TIRE -->
-  <joint name="robot_front_right_wheel_joint" type="continuous">
+  <joint name="robot_front_right_wheel_joint" type="revolute">
     <parent link="robot_base_link"/>
     <child link="robot_front_right_wheel"/>
     <origin rpy="0 0 0" xyz="0.229 -0.235 0.0"/>
     <axis rpy="0 0 0" xyz="0 1 0"/>
-    <limit effort="100" velocity="100"/>
+    <limit effort="100" velocity="100" lower="-1000000" upper="1000000"/>
     <joint_properties damping="0.0" friction="0.0"/>
   </joint>
   <link name="robot_front_right_wheel">
@@ -82,12 +82,12 @@
     </inertial>
   </link>
   <!--WHEEL TIRE -->
-  <joint name="robot_front_left_wheel_joint" type="continuous">
+  <joint name="robot_front_left_wheel_joint" type="revolute">
     <parent link="robot_base_link"/>
     <child link="robot_front_left_wheel"/>
     <origin rpy="0 0 0" xyz="0.229 0.235 0.0"/>
     <axis rpy="0 0 0" xyz="0 1 0"/>
-    <limit effort="100" velocity="100"/>
+    <limit effort="100" velocity="100" lower="-1000000" upper="1000000"/>
     <joint_properties damping="0.0" friction="0.0"/>
   </joint>
   <link name="robot_front_left_wheel">
@@ -110,12 +110,12 @@
     </inertial>
   </link>
   <!--WHEEL TIRE -->
-  <joint name="robot_back_left_wheel_joint" type="continuous">
+  <joint name="robot_back_left_wheel_joint" type="revolute">
     <parent link="robot_base_link"/>
     <child link="robot_back_left_wheel"/>
     <origin rpy="0 0 0" xyz="-0.229 0.235 0.0"/>
     <axis rpy="0 0 0" xyz="0 1 0"/>
-    <limit effort="100" velocity="100"/>
+    <limit effort="100" velocity="100" lower="-1000000" upper="1000000"/>
     <joint_properties damping="0.0" friction="0.0"/>
   </joint>
   <link name="robot_back_left_wheel">
@@ -138,12 +138,12 @@
     </inertial>
   </link>
   <!--WHEEL TIRE -->
-  <joint name="robot_back_right_wheel_joint" type="continuous">
+  <joint name="robot_back_right_wheel_joint" type="revolute">
     <parent link="robot_base_link"/>
     <child link="robot_back_right_wheel"/>
     <origin rpy="0 0 0" xyz="-0.229 -0.235 0.0"/>
     <axis rpy="0 0 0" xyz="0 1 0"/>
-    <limit effort="100" velocity="100"/>
+    <limit effort="100" velocity="100" lower="-1000000" upper="1000000"/>
     <joint_properties damping="0.0" friction="0.0"/>
   </joint>
   <link name="robot_back_right_wheel">
@@ -251,11 +251,11 @@
       <inertia ixx="0.0015203172520400004" ixy="0" ixz="0" iyy="0.0015203172520400004" iyz="0" izz="0.00059816"/>
     </inertial>
   </link>
-  <joint name="robot_j2s7s300_joint_1" type="continuous">
+  <joint name="robot_j2s7s300_joint_1" type="revolute">
     <parent link="robot_j2s7s300_link_base"/>
     <child link="robot_j2s7s300_link_1"/>
     <axis xyz="0 0 1"/>
-    <limit effort="40" velocity="0.6283185307179586"/>
+    <limit effort="40" velocity="0.6283185307179586" lower="-1000000" upper="1000000"/>
     <origin rpy="0 3.141592653589793 0" xyz="0 0 0.15675"/>
     <dynamics damping="0.0" friction="0.0"/>
   </joint>
@@ -317,11 +317,11 @@
       <inertia ixx="0.00247073761701" ixy="0" ixz="0" iyy="0.00247073761701" iyz="0" izz="0.000380115"/>
     </inertial>
   </link>
-  <joint name="robot_j2s7s300_joint_3" type="continuous">
+  <joint name="robot_j2s7s300_joint_3" type="revolute">
     <parent link="robot_j2s7s300_link_2"/>
     <child link="robot_j2s7s300_link_3"/>
     <axis xyz="0 0 1"/>
-    <limit effort="40" velocity="0.6283185307179586"/>
+    <limit effort="40" velocity="0.6283185307179586" lower="-1000000" upper="1000000"/>
     <origin rpy="-1.5707963267948966 0 0" xyz="0 -0.205 0"/>
     <dynamics damping="0.0" friction="0.0"/>
   </joint>
@@ -383,11 +383,11 @@
       <inertia ixx="0.0004321316048000001" ixy="0" ixz="0" iyy="0.0004321316048000001" iyz="0" izz="9.260000000000001e-05"/>
     </inertial>
   </link>
-  <joint name="robot_j2s7s300_joint_5" type="continuous">
+  <joint name="robot_j2s7s300_joint_5" type="revolute">
     <parent link="robot_j2s7s300_link_4"/>
     <child link="robot_j2s7s300_link_5"/>
     <axis xyz="0 0 1"/>
-    <limit effort="20" velocity="0.8377580409572781"/>
+    <limit effort="20" velocity="0.8377580409572781" lower="-1000000" upper="1000000"/>
     <origin rpy="-1.5707963267948966 0 3.141592653589793" xyz="0 0.2073 -0.0114"/>
     <dynamics damping="0.0" friction="0.0"/>
   </joint>
@@ -449,11 +449,11 @@
       <inertia ixx="0.00034532361869999995" ixy="0" ixz="0" iyy="0.00034532361869999995" iyz="0" izz="0.0005815999999999999"/>
     </inertial>
   </link>
-  <joint name="robot_j2s7s300_joint_7" type="continuous">
+  <joint name="robot_j2s7s300_joint_7" type="revolute">
     <parent link="robot_j2s7s300_link_6"/>
     <child link="robot_j2s7s300_link_7"/>
     <axis xyz="0 0 1"/>
-    <limit effort="20" velocity="0.8377580409572781"/>
+    <limit effort="20" velocity="0.8377580409572781" lower="-1000000" upper="1000000"/>
     <origin rpy="-1.5707963267948966 0 3.141592653589793" xyz="0 0.10375 0"/>
     <dynamics damping="0.0" friction="0.0"/>
   </joint>

@@ -42,21 +42,11 @@ def main():
     print(f"joint vel limits: {joint_vel_limits}")
     
 
-    # Sinusoidal reference
-    # Specify different amplitude values for each joint
-    amplitudes = [0, 0.1, 0]  # Example amplitudes for 4 joints
-    # Specify different frequency values for each joint
-    frequencies = [0.4, 0.5, 0.4]  # Example frequencies for 4 joints
-
-    # Convert lists to NumPy arrays for easier manipulation in computations
-    amplitude = np.array(amplitudes)
-    frequency = np.array(frequencies)
-    ref = SinusoidalReference(amplitude, frequency,init_cartesian_pos)  # Initialize the reference
+    # fixed initial position
     
-    #check = ref.check_sinusoidal_feasibility(sim)  # Check the feasibility of the reference trajectory
-    #if not check:
-    #    raise ValueError("Sinusoidal reference trajectory is not feasible. Please adjust the amplitude or frequency.")
-    
+    q_des = np.array([0.0, 1.57, 0.0, 1.0, 0.0, 1.0, 0.0,0.1,0.1,0.1,0.1,0.1,0.1])  # Initialize the reference
+    qd_des_clip = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,0.0,0.0,0.0])
+   
     #simulation_time = sim.GetTimeSinceReset()
     time_step = sim.GetTimeStep()
     current_time = 0
@@ -74,9 +64,6 @@ def main():
     # Initialize data storage
     q_mes_all, qd_mes_all, q_d_all, qd_d_all,  = [], [], [], []
     
-    # regressor all is a list of matrices
-    regressor_all = np.array([])
-
     
     # data collection loop
     while True:
@@ -87,15 +74,14 @@ def main():
         # Compute sinusoidal reference trajectory
         # Ensure q_init is within the range of the amplitude
         
-        p_d, pd_d = ref.get_values(current_time)  # Desired position and velocity
         
         # inverse differential kinematics
-        ori_des = None
-        ori_d_des = None
-        q_des, qd_des_clip = CartesianDiffKin(dyn_model,controlled_frame_name,q_mes, p_d, pd_d, ori_des, ori_d_des, time_step, "pos",  kp_pos, kp_ori, np.array(joint_vel_limits))
+        #ori_des = None
+        #ori_d_des = None
+        #q_des, qd_des_clip = CartesianDiffKin(dyn_model,controlled_frame_name,q_mes, p_d, pd_d, ori_des, ori_d_des, time_step, "pos",  kp_pos, kp_ori, np.array(joint_vel_limits))
         
         # Control command
-        cmd.tau_cmd = feedback_lin_ctrl(dyn_model, q_mes, qd_mes, q_des, qd_des_clip, kp, kd)  # Zero torque command
+        cmd = feedback_lin_ctrl(dyn_model, q_mes, qd_mes, q_des, qd_des_clip, kp, kd)  # Zero torque command
         sim.Step(cmd, "torque")  # Simulation step with torque command
 
         if dyn_model.visualizer: 

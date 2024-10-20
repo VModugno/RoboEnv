@@ -20,7 +20,7 @@
         "init_link_base_vel": [[0.0, 0.0, 0.0]],
         "init_link_base_orientation": [[]],
         "init_link_base_ang_vel": [[0.0, 0.0, 0.0]],
-        "init_motor_angles": [[0.000, 0.000, 0.0000, 0.0000, 1.57, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,0.1,0.1,0.1,0.1]],
+        "init_motor_angles": [[0.000, 0.000, 0.0000, 0.0000, 0.0, 1.57, 0.0, 1.0, 0.0, 1.0, 0.0,0.1,0.1,0.1,0.1,0.1,0.1]],
         "init_motor_vel":[[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,0.0,0.0,0.0]],
         "motor_offset": [[]],
         "motor_direction": [[]],
@@ -60,10 +60,17 @@
     "robot_pin": {
         "base_type": ["floating"],
         "robot_description_model": [""],
-        "urdf_path": ["summit_xl_arm_description/summit_xl_complete.urdf"],
+        "urdf_path": ["summit_xl_arm_description/summit_xl_complete_pin.urdf"],
         "ros_urdf_path": [""],
         "floating_base_name": ["robot_base_footprint"],
-        "joint_state_conversion_active": [1]
+        "joint_state_conversion_active": [1],
+        "control_groups":[
+            {
+                "wheels_joints": ["robot_front_right_wheel_joint","robot_front_left_wheel_joint","robot_back_left_wheel_joint","robot_back_right_wheel_joint"],
+                "arms_joints": ["robot_j2s7s300_joint_1","robot_j2s7s300_joint_2","robot_j2s7s300_joint_3","robot_j2s7s300_joint_4","robot_j2s7s300_joint_5","robot_j2s7s300_joint_6","robot_j2s7s300_joint_7"],
+                "hand_joints": ["robot_j2s7s300_joint_finger_1","robot_j2s7s300_joint_finger_tip_1","robot_j2s7s300_joint_finger_2","robot_j2s7s300_joint_finger_tip_2","robot_j2s7s300_joint_finger_3","robot_j2s7s300_joint_finger_tip_3"]
+            }
+        ]
     }
   
     
