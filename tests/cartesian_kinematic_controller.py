@@ -6,10 +6,15 @@ from simulation_and_control import pb, MotorCommands, PinWrapper, feedback_lin_c
 
 
 def main():
-    # Configuration for the simulation
+
     conf_file_name = "pandaconfig.json"  # Configuration file for the robot
-    cur_dir = os.path.dirname(os.path.abspath(__file__))
-    sim = pb.SimInterface(conf_file_name, conf_file_path_ext = cur_dir)  # Initialize simulation interface
+    root_dir = os.path.dirname(os.path.abspath(__file__))
+    # added this line to manage the fact that the file is in tests folder
+    name_current_directory = "tests"
+    # remove current directory name from cur_dir
+    root_dir = root_dir.replace(name_current_directory, "")
+    # Configuration for the simulation
+    sim = pb.SimInterface(conf_file_name, conf_file_path_ext = root_dir)  # Initialize simulation interface
 
     # Get active joint names from the simulation
     ext_names = sim.getNameActiveJoints()
@@ -18,7 +23,7 @@ def main():
     source_names = ["pybullet"]  # Define the source for dynamic modeling
 
     # Create a dynamic model of the robot
-    dyn_model = PinWrapper(conf_file_name, "pybullet", ext_names, source_names, False,0,cur_dir)
+    dyn_model = PinWrapper(conf_file_name, "pybullet", ext_names, source_names, False,0,root_dir)
     num_joints = dyn_model.getNumberofActuatedJoints()
 
     controlled_frame_name = "panda_link8"
@@ -91,7 +96,8 @@ def main():
         q_des, qd_des_clip = CartesianDiffKin(dyn_model,controlled_frame_name,q_mes, p_d, pd_d, ori_des, ori_d_des, time_step, "pos",  kp_pos, kp_ori, np.array(joint_vel_limits))
         
         # Control command
-        cmd.tau_cmd = feedback_lin_ctrl(dyn_model, q_mes, qd_mes, q_des, qd_des_clip, kp, kd)  # Zero torque command
+        tau_cmd = feedback_lin_ctrl(dyn_model, q_mes, qd_mes, q_des, qd_des_clip, kp, kd)  # Zero torque command
+        cmd.SetControlCmd(tau_cmd, ["torque"]*7)  # Set the torque command
         sim.Step(cmd, "torque")  # Simulation step with torque command
 
         if dyn_model.visualizer: 

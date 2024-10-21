@@ -3,7 +3,65 @@ import time
 import os
 import matplotlib.pyplot as plt
 from simulation_and_control import pb, MotorCommands, PinWrapper, feedback_lin_ctrl, SinusoidalReference, CartesianDiffKin
+from simulation_and_control import differential_drive_regulation_controller
 
+def WholeBodyController(dyn_model,base_pos_,base_or_, q_, qd_, base_pos_d, base_or_d, q_d, qd_d, kp_pos, kp_ori, kp, kd):
+    """
+    Perform whole-body control on a robotic system.
+
+    Parameters:
+    - dyn_model (pin_wrapper): The dynamics model of the robot encapsulated within a 'pin_wrapper' object,
+                               which provides methods for computing robot dynamics such as mass matrices,
+                               Coriolis forces, etc.
+    - q_ (numpy.ndarray): Measured positions of the robot's joints, indicating the current actual positions
+                          as measured by sensors or estimated by observers.
+    - qd_ (numpy.ndarray): Measured velocities of the robot's joints, reflecting the current actual velocities.
+    - q_d (numpy.ndarray): Desired positions for the robot's joints set by a trajectory generator or a higher-level
+                           controller, dictating target positions.
+    - qd_d (numpy.ndarray): Desired velocities for the robot's joints, specifying the rate at which the joints
+                            should move towards their target positions.
+    - kp_pos (float): Proportional gain for position control, adjusting the response to position error.
+    - kp_ori (float): Proportional gain for orientation control, adjusting the response to orientation error.
+    - kp (float or numpy.ndarray): Proportional gain(s) for the control system, which can be a uniform value across
+                                   all joints or unique for each joint, adjusting the response to position error.
+    - kd (float or numpy.ndarray): Derivative gain(s), similar to kp, affecting the response to velocity error and
+                                   aiding in system stabilization by damping oscillations.
+
+    Returns:
+    None
+
+    This function computes the control inputs necessary to achieve desired joint positions and velocities by
+    applying whole-body control, using the robot's dynamic model to appropriately compensate for its
+    inherent dynamics. The control law implemented typically combines proportional-derivative (PD) control
+    with dynamic compensation to achieve precise and stable motion.
+    """
+    # Command and control loop
+    cmd = MotorCommands()  # Initialize command structure for motors
+    wheel_radius = 0.1
+    wheel_base_width = 0.5
+
+    # i need to convert from quaternion to bearing (yaw)
+    base_bearing_ = pb.QuaternionToEuler(base_or_)[2]
+    base_bearing_d = pb.QuaternionToEuler(base_or_d)[2]
+
+    # remove from the joint positions and velocity the wheels joints
+    q_robot = q_[4:]
+    qd_robot = qd_[4:]
+    q_wheels = q_d[:4]
+    qd_wheels = q_d[:4]
+
+
+    angular_wheels_velocity = differential_drive_regulation_controller(base_pos_,base_bearing_,base_pos_d,base_bearing_d,wheel_radius,wheel_base_width, kp_pos, kp_ori)
+    
+    torque_joints = feedback_lin_ctrl(dyn_model, q_, qd_, q_d, qd_d, kp, kd)
+    # all torques
+    cmd_all = np.concatenate((angular_wheels_velocity,torque_joints))
+    interface_all_wheels= ["velocity","velocity","velocity","velocity"]
+    interface_all_joints = ["torque"]*13
+    interface_all = interface_all_wheels + interface_all_joints
+    cmd.setCommand(cmd_all,interface_all)
+    return cmd
+   
 
 def main():
     # Configuration for the simulation
@@ -27,7 +85,10 @@ def main():
 
     controlled_frame_name = "robot_j2s7s300_end_effector"
     init_joint_angles = sim.GetInitMotorAngles()
-    init_cartesian_pos,init_R = dyn_model.ComputeFK(init_joint_angles,controlled_frame_name)
+    init_base_pos = sim.GetBasePosition()
+    init_base_ori = sim.GetBaseOrientation()
+    init_state_position = np.concatenate((init_base_pos, init_base_ori,init_joint_angles))
+    init_cartesian_pos,init_R = dyn_model.ComputeFK(init_state_position,controlled_frame_name)
     # print init joint
     print(f"Initial joint angles: {init_joint_angles}")
     
@@ -43,15 +104,18 @@ def main():
     
 
     # fixed initial position
-    
-    q_des = np.array([0.0, 1.57, 0.0, 1.0, 0.0, 1.0, 0.0,0.1,0.1,0.1,0.1,0.1,0.1])  # Initialize the reference
-    qd_des_clip = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,0.0,0.0,0.0])
-   
+    des_base_pos = np.array([0.5, 0.5, 0.0])
+    des_base_ori = np.array([0.0, 0.0, 0.0, 1.0])
+    joint_des_angles = np.array([0.000, 0.000, 0.0000, 0.0000, 0.0, 1.57, 0.0, 1.0, 0.0, 1.0, 0.0,0.1,0.1,0.1,0.1,0.1,0.1])
+    q_des = np.concatenate((des_base_pos, des_base_ori, joint_des_angles))
+    des_base_lin_vel = np.array([0.0, 0.0, 0.0])
+    des_base_ang_vel = np.array([0.0, 0.0, 0.0])
+    qd_des_clip = np.concatenate((des_base_lin_vel, des_base_ang_vel, np.zeros(num_joints)))
+
     #simulation_time = sim.GetTimeSinceReset()
     time_step = sim.GetTimeStep()
     current_time = 0
-    # Command and control loop
-    cmd = MotorCommands()  # Initialize command structure for motors
+    
     
     # P conttroller high level
     kp_pos = 100 # position 
@@ -63,11 +127,13 @@ def main():
 
     # Initialize data storage
     q_mes_all, qd_mes_all, q_d_all, qd_d_all,  = [], [], [], []
-    
+    base_pos_all, base_ori_all = [], []
     
     # data collection loop
     while True:
         # measure current state
+        base_pos = sim.GetBasePosition()
+        base_ori = sim.GetBaseOrientation()
         q_mes = sim.GetMotorAngles(0)
         qd_mes = sim.GetMotorVelocities(0)
         qdd_est = sim.ComputeMotorAccelerationTMinusOne(0)
@@ -75,19 +141,14 @@ def main():
         # Ensure q_init is within the range of the amplitude
         
         
-        # inverse differential kinematics
-        #ori_des = None
-        #ori_d_des = None
-        #q_des, qd_des_clip = CartesianDiffKin(dyn_model,controlled_frame_name,q_mes, p_d, pd_d, ori_des, ori_d_des, time_step, "pos",  kp_pos, kp_ori, np.array(joint_vel_limits))
-        
         # Control command
-        cmd = feedback_lin_ctrl(dyn_model, q_mes, qd_mes, q_des, qd_des_clip, kp, kd)  # Zero torque command
-        sim.Step(cmd, "torque")  # Simulation step with torque command
+        #
+        sim.Step(cmd,"torque")  # Simulation step with torque command
 
-        if dyn_model.visualizer: 
-            for index in range(len(sim.bot)): # Conditionally display the robot model
-                q = sim.GetMotorAngles(index)
-                dyn_model.DisplayModel(q)  # Update the display of the robot model
+        #if dyn_model.visualizer: 
+        #    for index in range(len(sim.bot)): # Conditionally display the robot model
+        #        q = sim.GetMotorAngles(index)
+        #        dyn_model.DisplayModel(q)  # Update the display of the robot model
 
         # Exit logic with 'q' key
         keys = sim.GetPyBulletClient().getKeyboardEvents()
@@ -98,6 +159,8 @@ def main():
         #simulation_time = sim.GetTimeSinceReset()
 
         # Store data for plotting
+        base_pos_all.append(base_pos)
+        base_ori_all.append(base_ori)
         q_mes_all.append(q_mes)
         qd_mes_all.append(qd_mes)
         q_d_all.append(q_des)
@@ -136,11 +199,7 @@ def main():
         plt.tight_layout()
         plt.show()
     
-    # training procedure
-    
-    # Convert lists of matrices to NumPy arrays for easier manipulation in computations
-    
-    big_regressor = np.array(regressor_all)
+   
      
     
     
