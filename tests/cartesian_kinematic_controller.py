@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 from simulation_and_control import pb, MotorCommands, PinWrapper, feedback_lin_ctrl, SinusoidalReference, CartesianDiffKin
 
 
+cartesian_flag = True
+regulation_flag = True
+
 def main():
 
     conf_file_name = "pandaconfig.json"  # Configuration file for the robot
@@ -42,8 +45,11 @@ def main():
     
     print(f"joint vel limits: {joint_vel_limits}")
     
-
-    # Sinusoidal reference
+    # for regulation
+    q_des =  init_joint_angles
+    qd_des_clip = np.zeros(num_joints)
+    
+    # Sinusoidal reference for cartesian trajectory tracking
     # Specify different amplitude values for each joint
     amplitudes = [0, 0.1, 0]  # Example amplitudes for 4 joints
     # Specify different frequency values for each joint
@@ -75,8 +81,6 @@ def main():
     # Initialize data storage
     q_mes_all, qd_mes_all, q_d_all, qd_d_all,  = [], [], [], []
     
-    # regressor all is a list of matrices
-    regressor_all = np.array([])
 
     
     # data collection loop
@@ -87,13 +91,15 @@ def main():
         qdd_est = sim.ComputeMotorAccelerationTMinusOne(0)
         # Compute sinusoidal reference trajectory
         # Ensure q_init is within the range of the amplitude
+
+        if not regulation_flag:
         
-        p_d, pd_d = ref.get_values(current_time)  # Desired position and velocity
-        
-        # inverse differential kinematics
-        ori_des = None
-        ori_d_des = None
-        q_des, qd_des_clip = CartesianDiffKin(dyn_model,controlled_frame_name,q_mes, p_d, pd_d, ori_des, ori_d_des, time_step, "pos",  kp_pos, kp_ori, np.array(joint_vel_limits))
+            p_d, pd_d = ref.get_values(current_time)  # Desired position and velocity
+            
+            # inverse differential kinematics
+            ori_des = None
+            ori_d_des = None
+            q_des, qd_des_clip = CartesianDiffKin(dyn_model,controlled_frame_name,q_mes, p_d, pd_d, ori_des, ori_d_des, time_step, "pos",  kp_pos, kp_ori, np.array(joint_vel_limits))
         
         # Control command
         tau_cmd = feedback_lin_ctrl(dyn_model, q_mes, qd_mes, q_des, qd_des_clip, kp, kd)  # Zero torque command

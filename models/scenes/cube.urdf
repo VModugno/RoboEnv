@@ -1,0 +1,19 @@
+# Define cube dimensions (20 cm)
+cube_size = 0.1  # meters
+
+# Define collision shape (box)
+collision_shape_id = self.pybullet_client.createCollisionShape(shapeType=self.pybullet_client.GEOM_BOX,halfExtents=[cube_size / 2] * 3)
+
+# Define visual shape (optional, for coloring)
+visual_shape_id = self.pybullet_client.createVisualShape(shapeType=self.pybullet_client.GEOM_BOX,halfExtents=[cube_size / 2] * 3,rgbaColor=[0.5, 0.5, 0.5, 1])
+
+# Define mass and inertia
+mass = 1.0  # kilograms
+# Inertia is automatically calculated by PyBullet if not provided
+
+# Define the position (50 cm along Y-axis and 10 cm above the ground)
+position = [0.7, 0.0, cube_size / 2]  # x, y, z in meters
+orientation = self.pybullet_client.getQuaternionFromEuler([0, 0, 0])  # No rotation
+
+# Create the multi-body (the cube)
+cube_id = self.pybullet_client.createMultiBody(baseMass=mass,baseCollisionShapeIndex=collision_shape_id,baseVisualShapeIndex=visual_shape_id,basePosition=position,baseOrientation=orientation)

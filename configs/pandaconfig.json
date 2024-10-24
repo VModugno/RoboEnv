@@ -54,7 +54,7 @@
     },
 
     "env_pybullet": {
-        "env_script_name": ""
+        "env_script_name": "cube.urdf"
     },
 
     "robot_pin": {
