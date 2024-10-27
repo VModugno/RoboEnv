@@ -154,6 +154,7 @@ def main():
         base_pos = sim.GetBasePosition()
         base_ori = sim.GetBaseOrientation()
         base_bearing_ = quaternion2bearing(base_ori[3], base_ori[0], base_ori[1], base_ori[2])
+        print("base_bearing_ with noise",base_bearing_)
         cmd = MotorCommands()  # Initialize command structure for motors
         # Check if all waypoints are completed
         if current_waypoint_index < num_waypoints:
