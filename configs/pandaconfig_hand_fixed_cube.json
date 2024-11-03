@@ -60,7 +60,7 @@
     "robot_pin": {
         "base_type": ["fixed"],
         "robot_description_model": [""],
-        "urdf_path": ["panda_description/panda_with_hand_and_cube_grond_truth.urdf"],
+        "urdf_path": ["panda_description/panda_with_hand_and_cube_wrong_model.urdf"],
         "ros_urdf_path": [""],
         "floating_base_name": ["floating_base"],
         "joint_state_conversion_active": [1]
