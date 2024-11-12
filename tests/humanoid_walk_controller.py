@@ -5,10 +5,12 @@ import matplotlib.pyplot as plt
 from simulation_and_control import pb, MotorCommands, PinWrapper
 
 
-cartesian_flag = True
-regulation_flag = True
-
 def main():
+
+    #init_joint_position=[0., 0., 0., 0.,  0.,  -3.,  -25.,  50., -25.,   3.,  0.,  3., -25.,  50.,  -25.,  -3., 4.,  -8.,  0.,  -25., 4.,  8.,  0.,  -25.]
+    #convert_init_joint_position = [x * np.pi / 180. for x in init_joint_position]
+    #print("init_joint_position", convert_init_joint_position)
+    #print("len of joint_position=",len(init_joint_position))
 
     conf_file_name = "hrp4config.json"  # Configuration file for the robot
     root_dir = os.path.dirname(os.path.abspath(__file__))
@@ -29,9 +31,7 @@ def main():
     dyn_model = PinWrapper(conf_file_name, "pybullet", ext_names, source_names, False,0,root_dir)
     num_joints = dyn_model.getNumberofActuatedJoints()
 
-    init_joint_position=[0., 0., 0., 0.,  0.,  -3.,  -25.,  50., -25.,   3.,  0.,  3., -25.,  50.,  -25.,  -3., 4.,  -8.,  0.,  -25., 4.,  8.,  0.,  -25.]
-    convert_init_joint_position = [x * np.pi / 180. for x in init_joint_position]
-    print("init_joint_position", convert_init_joint_position)
+    
 
     
     # while True:
@@ -124,3 +124,6 @@ def main():
     #                   'vel': np.zeros(3),
     #                   'acc': np.zeros(3)}
     #     }
+
+if __name__ == '__main__':
+    main()
