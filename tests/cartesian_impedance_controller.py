@@ -2,11 +2,8 @@ import numpy as np
 import time
 import os
 import matplotlib.pyplot as plt
-from simulation_and_control import pb, MotorCommands, PinWrapper, feedback_lin_ctrl, SinusoidalReference, CartesianDiffKin
+from simulation_and_control import pb, MotorCommands, PinWrapper, feedback_lin_ctrl, SinusoidalReference, ImpedanceController
 
-
-cartesian_flag = True
-regulation_flag = True
 
 def main():
 
@@ -81,8 +78,9 @@ def main():
     # Initialize data storage
     q_mes_all, qd_mes_all, q_d_all, qd_d_all,  = [], [], [], []
     
-
-    
+    controlled_frame_name = "panda_link8"
+    # external forces (the wrench applied to the end effector) for now assumed zero because no contact with the environment
+    tau_ext = np.zeros(6)
     # data collection loop
     while True:
         # measure current state
@@ -92,17 +90,13 @@ def main():
         # Compute sinusoidal reference trajectory
         # Ensure q_init is within the range of the amplitude
 
-        if not regulation_flag:
+       
         
-            p_d, pd_d = ref.get_values(current_time)  # Desired position and velocity
-            
-            # inverse differential kinematics
-            ori_des = None
-            ori_d_des = None
-            q_des, qd_des_clip = CartesianDiffKin(dyn_model,controlled_frame_name,q_mes, p_d, pd_d, ori_des, ori_d_des, time_step, "pos",  kp_pos, kp_ori, np.array(joint_vel_limits))
-        
+        p_d, pd_d = ref.get_values(current_time)  # Desired position and velocity
+
+
         # Control command
-        tau_cmd = feedback_lin_ctrl(dyn_model, q_mes, qd_mes, q_des, qd_des_clip, kp, kd)  # Zero torque command
+        tau_cmd = ImpedanceController(dyn_model,controlled_frame_name, q_mes, qd_mes, p_d, kp, kd, tau_ext)  # Zero torque command
         cmd.SetControlCmd(tau_cmd, ["torque"]*7)  # Set the torque command
         sim.Step(cmd, "torque")  # Simulation step with torque command
 
@@ -158,9 +152,7 @@ def main():
         plt.tight_layout()
         plt.show()
     
-   
-    
-    
+  
      
     
     
