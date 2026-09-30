@@ -1,0 +1,31 @@
+[workspace]
+name = "roboenv"
+channels = ["conda-forge"]
+# Windows, Linux and macOS (Intel & Apple Silicon) are all first-class targets.
+platforms = ["win-64", "linux-64", "osx-64", "osx-arm64"]
+
+[dependencies]
+# simulation stack
+pinocchio = "*"
+pybullet = "*"
+robot_descriptions = "*"
+casadi = "*"
+numpy = "*"
+matplotlib = "*"
+
+# The git submodule is installed editable into the pixi environment.
+[pypi-dependencies]
+simulation_and_control = { path = "./simulation_and_control", editable = true }
+
+[tasks]
+
+# --- test / example scripts -------------------------------------------------
+test-cartesian-kin = "python tests/cartesian_kinematic_controller.py"
+test-cartesian-impedance = "python tests/cartesian_impedance_controller.py"
+test-humanoid-walk = "python tests/humanoid_walk_controller.py"
+test-mobile-base-kin = "python tests/mobile_base_kinematic_controller.py"
+test-mobile-base-arm-kin = "python tests/mobile_base_arm_kinematic_controller.py"
+
+# --- helpers -----------------------------------------------------------------
+# Quick check that the environment and the editable submodule import correctly.
+smoke-test = "python -c \"import numpy, pinocchio, pybullet, casadi, matplotlib, robot_descriptions, simulation_and_control; print('simulation_and_control OK')\""
