@@ -1,0 +1,6 @@
+# pixi environments (created by 'pixi install' / 'pixi run')
+.pixi/*
+!.pixi/config.toml
+
+# local agent/tooling state
+.omo/
