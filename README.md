@@ -1,116 +1,133 @@
 # RoboEnv
 
-Welcome to **RoboEnv**, a repository designed to manage and set up the environment for robotic simulation and control. This repository includes an `environment.yaml` file that specifies all dependencies and links to other essential repositories, ensuring a seamless setup for robotic development and testing.
+Welcome to **RoboEnv**, a repository designed to manage and set up the environment for robotic simulation and control. The environment is defined with [pixi](https://pixi.sh) and works seamlessly on **Windows, Linux and macOS** (Intel and Apple Silicon).
 
 ## Repository Overview
 
-**RoboEnv** provides a central place to:
-- Set up a consistent development environment for robotic simulation.
-- Install and manage dependencies required for the `sim_and_control` and `mycobot_client` repositories.
-- Facilitate easy integration and usage of robotic control algorithms.
+**RoboEnv** provides:
+
+- A consistent, reproducible environment for robotic simulation (`pixi.toml` + `pixi.lock`).
+- The [`simulation_and_control`](https://github.com/VModugno/simulation_and_control) library, included as a git submodule and installed **editable** into the environment.
+- Ready-to-run example/test scripts in `tests/` that exercise the simulation stack.
 
 ## Getting Started
 
 ### Prerequisites
 
-To get started with **RoboEnv**, you need to have the following software installed on your system:
+The only requirement is [pixi](https://pixi.sh) (and Git). Install pixi with:
 
-- **Git**: Version control system to clone repositories.
-- **Conda/Mamba**: Package manager for managing environments. Mamba is a fast, flexible, and user-friendly package manager. If you don't have Mamba installed, follow the installation instructions available [here](https://github.com/conda-forge/miniforge). once mamba is istalled move to the next section.
+```bash
+# Windows (PowerShell)
+irm https://pixi.sh/install-pixi.ps1 | iex
 
-### Setting Up the Environment
+# macOS / Linux
+curl -fsSL https://pixi.sh/install.sh | sh
+```
 
-1. **Clone the `roboenv` Repository:**
+### Setup
+
+1. **Clone the repository with its submodule:**
 
    ```bash
    git clone --recurse-submodules https://github.com/VModugno/RoboEnv.git
    cd RoboEnv
    ```
 
-2.  **Install the Conda Environment and the simulation_and_control library:**
+   If you already cloned without submodules:
 
-    The environment.yaml file includes all the dependencies required for the simulation and control projects. To create the environment, run the below commands.
-    ```bash
-    mamba env create -f environment_ros2.yaml
-    mamba activate roboenv2 # or if it does not work try conda activate roboenv2
-    cd simulation_and_control
-    pip install .
-    ```
-   1. **Extra Installation Steps for windows user**
-   after installing the enviroment roboenv2 the windows user have to perform some extra steps to get ros/ros2 compilation working properly. They have to install visual studio 2022 and ensure that during the installation process the c/c++ for desktop development package is selected. After this in the roboenv2 they need to install 2 more packages
    ```bash
-   mamba install compilers
-   mamba install mamba install vs2022_win-64
-   ``` 
-   after this they have to options: from the search bar the can open the developer prompt activate the mamba/conda env and work from there to run colcon build or they can open up the miniforge prompt and check if the visual studio dependecies is correctly referenced by typing 
-   ```bash
-   where cl.exe
+   git submodule update --init --recursive
    ```
-   if this command return the path to visual code compiler then they are good to go also with
-   the miniforge prompt
-3.  **Using the Simulator**
-    
-   To ensure the simulator functions correctly, please copy the 'configs' and 'models' folders from the 'roboenv' environment into the same directory as your script. This directory is where your project's executable code is stored. The 'configs' folder contains essential configuration files that set the operational parameters for the simulator, while the 'models' folder includes the data models necessary for simulation. Placing these folders in the same directory as your script ensures that when the simulator runs, it can easily access and utilize these crucial resources, leading to a seamless operation
 
-4.  **Connecting to the real elephant robot**  
-    
-    prior to use the mycobot client, there is a bug with ros2 and the new version of setuptools (see [here](https://github.com/colcon/colcon-python-setup-py/issues/41)). To build python ros2 packages, we need to replace some code in one of the python files in the mamba environment. There is a command to do this in Linux automatically below. You can run that. If you are on Windows or Mac, look below this command, it will not work for you.
-    
-    ```bash
-    python -m site | grep -E miniforge3/envs.*?/lib/python3.11/site-packages | sed "s:,::g; s:\s::g; s:'::g" | awk '{print $1"/colcon_python_setup_py/package_identification/python_setup_py.py"}' | xargs sed -i -e "s/'from setuptools.extern.packaging.specifiers import SpecifierSet'/'from packaging.specifiers import SpecifierSet'/g"
-    ```
+2. **Install the environment:**
 
-    If you have trouble with the prior command, edit the file in a location similar to `/home/mz/miniforge3/envs/roboenv2/lib/python3.11/site-packages/colcon_python_setup_py/package_identification/python_setup_py.py` and change the line with `'from setuptools.extern.packaging.specifiers import SpecifierSet'` to `'from packaging.specifiers import SpecifierSet'`.
+   ```bash
+   pixi install
+   ```
 
-    On windows this may be in the directory `C:\Users\ACER\.conda\envs\roboenv2\Lib\site-packages\colcon_python_setup_py\package_identification`.
+   That's it. pixi downloads the locked conda packages for your platform and installs the `simulation_and_control` submodule editable — no compilers, no VS Build Tools, no activation scripts needed on any OS.
 
-6. **Activate the Environment:**
-    ```bash
-    conda activate roboenv2
-    ```
+3. **Verify the installation:**
 
-7. **Pull Submodule (if you already cloned the repository without the submodules):**
-    ```bash
-    git submodule update --init --recursive
-    ```
-8. Windows: Install Windows Build Tools--if on windows
+   ```bash
+   pixi run smoke-test
+   ```
+
+   You should see `simulation_and_control OK`.
+
+## Usage
+
+### Run the example scripts
+
+Each script in `tests/` has a pixi task (they run against the `configs/` and `models/` folders at the repository root — no copying required):
+
+```bash
+pixi run test-cartesian-kin
+pixi run test-cartesian-impedance
+pixi run test-humanoid-walk
+pixi run test-mobile-base-kin
+pixi run test-mobile-base-arm-kin
 ```
-# Install Visual Studio 2017, 2019 or 2022 with C++ support 
-# see https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=msvc-160
 
-# Install the Visual Studio command prompt - if you use Visual Studio 2019:
-mamba install vs2019_win-64
+### Write your own scripts
 
-# Install the Visual Studio command prompt - if you use Visual Studio 2022:
-mamba install vs2022_win-64
+Run any script inside the environment with:
+
+```bash
+pixi run python path/to/your_script.py
 ```
+
+or start an activated shell once and work as usual:
+
+```bash
+pixi shell
+python path/to/your_script.py
+```
+
+The example scripts locate `configs/` and `models/` by passing the repository root as `conf_file_path_ext` to `SimInterface`:
+
+```python
+import os
+import simulation_and_control.sim.pybullet_robot_interface as pb
+
+# Repository root = directory containing configs/ and models/
+root_dir = os.path.dirname(os.path.abspath(__file__))
+sim = pb.SimInterface(conf_file_name="mycobot_280_pi.yaml", conf_file_path_ext=root_dir)
+```
+
+Alternatively, copy the `configs` and `models` folders next to your script — `SimInterface` falls back to `../configs/` relative to its own package when `conf_file_path_ext` is not given.
+
+### The editable submodule
+
+`simulation_and_control` is installed editable from `./simulation_and_control`: any change you make in the submodule sources is immediately visible in the environment — no reinstall needed. Pulling upstream updates is just `git pull` inside the submodule.
+
+## Environment details
+
+- **Dependencies** (all from conda-forge): `pinocchio`, `pybullet`, `robot_descriptions`, `casadi`, `numpy`, `matplotlib`.
+- **Cross-platform**: `pixi.lock` is solved for `win-64`, `linux-64`, `osx-64` and `osx-arm64`; the same two commands (`git clone --recurse-submodules`, `pixi install`) work identically on all of them.
+- **Reproducibility**: `pixi.lock` is committed; everyone gets the exact same package versions.
+
+### Optional: Gepetto visualization (Linux only)
+
+The `visualizer=True` mode of `PinWrapper` uses [Gepetto Viewer](https://github.com/Gepetto/gepetto-viewer), which is only packaged for Linux. On Linux you can add it to a local environment without touching the lock file:
+
+```bash
+pixi add gepetto-viewer-corba
+```
+
+On Windows/macOS simply don't pass `visualizer=True`.
 
 ## Troubleshooting
 
-### All Operating Systems
-If you get an error like
-```
-CMake Error at /home/niels/opt/miniforge3/envs/roboenv2/share/cmake-3.29/Modules/FindPackage
-...
-Could NOT find Python3 (missing: Python3_NumPy_INCLUDE_DIRS NumPy)
-...
+- **PyBullet GUI does not open / crashes on a headless machine**: the example scripts open a GUI window; on a remote/headless box use `SimInterface(..., pb.GUI)` with `pb.DIRECT` (see the submodule docs) or run on a machine with a display.
+- **`pixi` command not found after install**: restart your terminal so the updated `PATH` (from `~/.pixi/bin` or `%USERPROFILE%\.pixi\bin`) is picked up.
+- **Submodule folders missing / import errors**: make sure you cloned with `--recurse-submodules` (or ran `git submodule update --init --recursive`), then re-run `pixi install`.
 
-```
-Try building your code with this flag. There seems to be some trouble with mamba and virtual environments for some people.
-```
-colcon build --cmake-args -D Python3_FIND_VIRTUALENV=ONLY
+## Updating the environment
+
+```bash
+pixi upgrade   # update pinned versions and refresh pixi.lock
+git add pixi.toml pixi.lock
 ```
 
-Also note that if you get a weird error with CMAKE with indices, check that none of your paths have a chinese character in them. https://blog.csdn.net/weixin_45753396/article/details/129050343
-![err_cmake](./err_msg.png)
-
-### Windows:
-Note that on windows you will need to `.\setup.bat` instead of source `install/setup.bash` when building. Also note you shouldn't use powershell, instead use command prompt or anaconda prompt.
-WSL: use WSL 2
-If doing native robostack, then you need to install visual studio 2019 or 2022 before you run the mamba install command.
-
-### Mac:
-Note that you will need to do the `.\setup.zsh` instead of `install/setup.bash` when building, or whatever your default shell is.
-Note also that clion can cause issues with the cmake in the virtual environmnet. You may need to re-install clion.
-
-
+See also [AGENTS.md](AGENTS.md) for a condensed, agent-friendly version of these instructions.
