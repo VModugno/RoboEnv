@@ -1,6 +1,6 @@
 # RoboEnv
 
-Welcome to **RoboEnv**, a repository designed to manage and set up the environment for robotic simulation and control. The environment is defined with [pixi](https://pixi.sh) and works seamlessly on **Windows, Linux and macOS** (Intel and Apple Silicon).
+Welcome to **RoboEnv**, a repository designed to manage and set up the environment for robotic simulation and control. Please see the following sections to use this package.
 
 ## Repository Overview
 
