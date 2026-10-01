@@ -14,17 +14,28 @@ Welcome to **RoboEnv**, a repository designed to manage and set up the environme
 
 ### Prerequisites
 
-The only requirement is [pixi](https://pixi.sh) (and Git). Install pixi with:
+You can use any python environment manager. We recommand using pixi or uv.
+
+Install pixi with:
 
 ```bash
 # Windows (PowerShell)
 irm https://pixi.sh/install-pixi.ps1 | iex
 
-# macOS / Linux
+# MacOS / Linux
 curl -fsSL https://pixi.sh/install.sh | sh
 ```
 
-### Setup
+Install uv with:
+```bash
+# Windows (PowerShell)
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# MacOS / Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+### Setup (Using pixi)
 
 1. **Clone the repository with its submodule:**
 
@@ -55,9 +66,28 @@ curl -fsSL https://pixi.sh/install.sh | sh
 
    You should see `simulation_and_control OK`.
 
+
+### Setup (Using uv)
+1. Create and activate a Python environment
+```bash
+# Go to your workspace folder. For example, cd to a lab folder.
+cd <path-to-workspace>
+
+# Create a python environment using uv
+uv venv -p 3.10
+
+# Activate the environment
+source .venv/bin/activate
+```
+
+2. Install this repo as a package
+```bash
+uv pip install <path-to-this-repo>
+```
+
 ## Usage
 
-### Run the example scripts
+### Run the example scripts (if you installed with pixi)
 
 Each script in `tests/` has a pixi task (they run against the `configs/` and `models/` folders at the repository root — no copying required):
 
@@ -69,65 +99,133 @@ pixi run test-mobile-base-kin
 pixi run test-mobile-base-arm-kin
 ```
 
+### Run the example scripts (if you installed with uv)
+```bash
+test-cartesian-kin
+test-cartesian-impedance
+test-humanoid-walk
+test-mobile-base-kin
+test-mobile-base-arm-kin
+
+# Add "uv run" in front of the above commands if it did not work.
+```
+
 ### Write your own scripts
 
-Run any script inside the environment with:
+With **pixi**, run scripts from the RoboEnv repository root:
 
 ```bash
 pixi run python path/to/your_script.py
 ```
 
-or start an activated shell once and work as usual:
+You can also activate the environment first:
 
 ```bash
 pixi shell
 python path/to/your_script.py
 ```
 
-The example scripts locate `configs/` and `models/` by passing the repository root as `conf_file_path_ext` to `SimInterface`:
+With **uv**, work from your own workspace after activating the virtual environment and installing RoboEnv as described above:
 
-```python
-import os
-import simulation_and_control.sim.pybullet_robot_interface as pb
-
-# Repository root = directory containing configs/ and models/
-root_dir = os.path.dirname(os.path.abspath(__file__))
-sim = pb.SimInterface(conf_file_name="mycobot_280_pi.yaml", conf_file_path_ext=root_dir)
+```bash
+python path/to/your_script.py
 ```
 
-Alternatively, copy the `configs` and `models` folders next to your script — `SimInterface` falls back to `../configs/` relative to its own package when `conf_file_path_ext` is not given.
+To run through uv while using that activated environment:
 
-### The editable submodule
+```bash
+uv run --active --no-project python path/to/your_script.py
+```
 
-`simulation_and_control` is installed editable from `./simulation_and_control`: any change you make in the submodule sources is immediately visible in the environment — no reinstall needed. Pulling upstream updates is just `git pull` inside the submodule.
+`--active` selects your activated virtual environment, and `--no-project` avoids discovering and synchronizing another project. See the [uv documentation](https://docs.astral.sh/uv/reference/cli/#uv-run).
+
+#### Locate configuration files and models
+
+Pass the directory containing both `configs/` and `models/` as `conf_file_path_ext`. Use the same directory when constructing `PinWrapper`.
+
+For a **uv installation**, RoboEnv bundles these assets with the installed package. Locate them through its installation metadata so your script can run from any workspace:
+
+```python
+from importlib.metadata import distribution
+from simulation_and_control import pb
+
+root_dir = str(distribution("roboenv").locate_file(""))
+sim = pb.SimInterface(
+    conf_file_name="pandaconfig.json",
+    conf_file_path_ext=root_dir,
+)
+```
+
+For **pixi**, use the RoboEnv checkout instead. If your script is saved at the repository root:
+
+```python
+from pathlib import Path
+from simulation_and_control import pb
+
+root_dir = str(Path(__file__).resolve().parent)
+sim = pb.SimInterface(
+    conf_file_name="pandaconfig.json",
+    conf_file_path_ext=root_dir,
+)
+```
+
+For a script in `RoboEnv/tests/`, use `Path(__file__).resolve().parents[1]`. If you maintain your own configurations and models, pass the absolute path to the directory containing your own `configs/` and `models/` folders.
+
+### Changes to the installed package
+
+The uv setup uses a regular installation: source code, examples, configurations, and models are installed into your virtual environment. After changing files in the RoboEnv checkout, reinstall the package to use those changes:
+
+```bash
+uv pip install --reinstall-package roboenv <path-to-this-repo>
+```
 
 ## Environment details
 
-- **Dependencies** (all from conda-forge): `pinocchio`, `pybullet`, `robot_descriptions`, `casadi`, `numpy`, `matplotlib`.
-- **Cross-platform**: `pixi.lock` is solved for `win-64`, `linux-64`, `osx-64` and `osx-arm64`; the same two commands (`git clone --recurse-submodules`, `pixi install`) work identically on all of them.
-- **Reproducibility**: `pixi.lock` is committed; everyone gets the exact same package versions.
+- **Pixi dependencies**: `pinocchio`, `pybullet`, `robot_descriptions`, `casadi`, `numpy`, and `matplotlib`, supplied by conda-forge.
+- **uv dependencies**: `numpy`, `pybullet`, `pin`, `robot-descriptions`, `casadi`, `matplotlib`, and `scipy`, declared in `pyproject.toml`. The PyPI package `pin` provides the robotics library imported as `pinocchio`.
+- **Pixi platform support**: `pixi.lock` covers `win-64`, `linux-64`, `osx-64`, and `osx-arm64`. uv installation depends on the availability of the Python dependencies for your platform and Python version.
+- **Reproducibility**: Pixi uses the committed `pixi.lock`. `uv pip install` resolves dependencies from `pyproject.toml` and does not use the Pixi lock file.
+- **Bundled assets with uv**: The installed package contains the example configurations and models, including their meshes. No copying into your workspace is required.
 
 ### Optional: Gepetto visualization (Linux only)
 
-The `visualizer=True` mode of `PinWrapper` uses [Gepetto Viewer](https://github.com/Gepetto/gepetto-viewer), which is only packaged for Linux. On Linux you can add it to a local environment without touching the lock file:
+The `visualizer=True` mode of `PinWrapper` uses [Gepetto Viewer](https://github.com/Gepetto/gepetto-viewer). It is not included in the default setup.
+
+For a **Pixi environment on Linux**, add it with:
 
 ```bash
 pixi add gepetto-viewer-corba
 ```
 
-On Windows/macOS simply don't pass `visualizer=True`.
+This updates the Pixi manifest and lock file. For a **uv environment**, Gepetto Viewer and its Python bindings require a separate installation following the viewer's instructions. Leave `visualizer=False` when the viewer is unavailable, including on Windows/macOS.
 
 ## Troubleshooting
 
-- **PyBullet GUI does not open / crashes on a headless machine**: the example scripts open a GUI window; on a remote/headless box use `SimInterface(..., pb.GUI)` with `pb.DIRECT` (see the submodule docs) or run on a machine with a display.
-- **`pixi` command not found after install**: restart your terminal so the updated `PATH` (from `~/.pixi/bin` or `%USERPROFILE%\.pixi\bin`) is picked up.
-- **Submodule folders missing / import errors**: make sure you cloned with `--recurse-submodules` (or ran `git submodule update --init --recursive`), then re-run `pixi install`.
+- **PyBullet GUI does not open / crashes on a headless machine**: The examples open a GUI window. In your own script, use `SimInterface(..., use_gui=False)` to run without a display.
+- **`pixi` or `uv` command not found after installation**: Restart your terminal so the updated `PATH` is picked up.
+- **uv example command not found / Python import fails**: Activate the workspace's virtual environment and install RoboEnv into it with `uv pip install <path-to-this-repo>`. You can also run a command through `uv run --active --no-project test-cartesian-kin` from that activated environment.
+- **Configuration or model file not found in your own script**: Set `conf_file_path_ext` explicitly using the asset-location examples above. For uv, use the installed assets; for Pixi, use the repository root. If an older uv installation lacks bundled assets, reinstall RoboEnv with `uv pip install --reinstall-package roboenv <path-to-this-repo>`.
+- **Submodule folders missing during installation**: Make sure RoboEnv was cloned with `--recurse-submodules`, or run `git submodule update --init --recursive` from the repository root. Then rerun `pixi install` or, from your activated uv workspace, `uv pip install <path-to-this-repo>`.
 
 ## Updating the environment
 
+For **pixi**, run these commands from the RoboEnv repository root:
+
 ```bash
-pixi upgrade   # update pinned versions and refresh pixi.lock
+pixi upgrade
 git add pixi.toml pixi.lock
 ```
 
-See also [AGENTS.md](AGENTS.md) for a condensed, agent-friendly version of these instructions.
+For **uv**, reinstall after updating the RoboEnv checkout:
+
+```bash
+uv pip install --reinstall-package roboenv <path-to-this-repo>
+```
+
+To also upgrade dependencies to the newest compatible versions allowed by `pyproject.toml`:
+
+```bash
+uv pip install --upgrade --reinstall-package roboenv <path-to-this-repo>
+```
+
+See also [AGENTS.md](AGENTS.md) for the Pixi workflow and the [uv environment documentation](https://docs.astral.sh/uv/pip/environments/) for working with virtual environments.
