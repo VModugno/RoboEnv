@@ -202,6 +202,7 @@ This updates the Pixi manifest and lock file. For a **uv environment**, Gepetto 
 ## Troubleshooting
 
 - **PyBullet GUI does not open / crashes on a headless machine**: The examples open a GUI window. In your own script, use `SimInterface(..., use_gui=False)` to run without a display.
+- **Python process dies silently on Windows during `numpy.linalg` calls (e.g. inside the controllers)**: the conda-forge `numpy` on win-64 can pick the MKL BLAS variant, whose OpenMP runtime delay-load crashes outside an activated shell. `pixi.toml` pins `libblas` to the OpenBLAS build for win-64 (`[target.win-64.dependencies]`), so a normal `pixi run` never hits this; if you roll that pin back and see bare `python.exe` processes vanish without a traceback, this is why.
 - **`pixi` or `uv` command not found after installation**: Restart your terminal so the updated `PATH` is picked up.
 - **uv example command not found / Python import fails**: Activate the workspace's virtual environment and install RoboEnv into it with `uv pip install <path-to-this-repo>`. You can also run a command through `uv run --active --no-project test-cartesian-kin` from that activated environment.
 - **Configuration or model file not found in your own script**: Set `conf_file_path_ext` explicitly using the asset-location examples above. For uv, use the installed assets; for Pixi, use the repository root. If an older uv installation lacks bundled assets, reinstall RoboEnv with `uv pip install --reinstall-package roboenv <path-to-this-repo>`.
