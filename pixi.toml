@@ -12,6 +12,11 @@ robot_descriptions = "*"
 casadi = "*"
 numpy = "*"
 matplotlib = "*"
+# QP backend for the humanoid controller (is-mpc + whole-body inverse
+# dynamics). casadi conic plugins ship in Library/bin (conda) or the package
+# dir (pip) but only load inside an activated env with that dir on the DLL
+# search path; osqp is the portable fallback the QPSolver probes down to.
+osqp = "*"
 
 # The git submodule is installed editable into the pixi environment.
 [pypi-dependencies]
