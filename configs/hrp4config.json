@@ -3,16 +3,19 @@
         "time_step": 0.001,
         "experiment_duration": 5,
         "feet": [
+      [
       {
-        "name": "FL",
-        "sensor_frame": "FL_foot_fixed",
+        "name": "lsole",
+        "sensor_frame": "L_FOOT",
         "contact_link_name": "l_sole"
       },
       {
-        "name": "FR",
-        "sensor_frame": "FR_foot_fixed",
+        "name": "rsole",
+        "sensor_frame": "R_FOOT",
         "contact_link_name": "r_sole"
-      }]
+      }
+      ]
+      ]
     },
     
     
@@ -22,9 +25,9 @@
         "robot_description_model":[""],
         "urdf_path": ["hrp4_description/hrp4.urdf"],
         "ros_urdf_path": "",
-        "init_link_base_position": [[0.007120698065811459, 0.025, 0.8667745993975244]],
+        "init_link_base_position": [[0.0071, 0.025, 0.8668]],
         "init_link_base_vel": [[0.0, 0.0, 0.0]],
-        "init_link_base_orientation": [[0, -0.2164396, 0, 0.976296 ]],
+        "init_link_base_orientation": [[0, -0.2164, 0, 0.9763]],
         "init_link_base_ang_vel": [[0.0, 0.0, 0.0]],
         "init_motor_angles_names":[["CHEST_P", "CHEST_Y", "NECK_P", "NECK_Y","R_HIP_Y", "R_HIP_R", "R_HIP_P", "R_KNEE_P", "R_ANKLE_P", "R_ANKLE_R","L_HIP_Y", "L_HIP_R", "L_HIP_P", "L_KNEE_P", "L_ANKLE_P", "L_ANKLE_R", 
                                     "R_SHOULDER_P", "R_SHOULDER_R", "R_SHOULDER_Y", "R_ELBOW_P", "L_SHOULDER_P", "L_SHOULDER_R", "L_SHOULDER_Y", "L_ELBOW_P"]],
