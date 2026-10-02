@@ -68,3 +68,30 @@ jobs:
         env:
           ROBOENV_HEADLESS: "1"
         run: pixi run test-mobile-base-arm-kin
+
+  # Full IS-MPC walking gait (2.14 m over 25 s, ~6 min wall-clock headless).
+  # Runs the complete footstep plan: 200-tick double-support warmup + 24
+  # walking steps (ss 70 + ds 30 ticks each) + final double-support stance.
+  humanoid-walk:
+    name: humanoid walk (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, macos-15-intel, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: prefix-dev/setup-pixi@v0.10.1
+        with:
+          pixi-version: v0.80.0
+          cache: true
+
+      - name: humanoid IS-MPC walk
+        env:
+          ROBOENV_HEADLESS: "1"
+          ROBOENV_MAX_STEPS: "26000"
+        run: pixi run test-humanoid-walk

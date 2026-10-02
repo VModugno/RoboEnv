@@ -12,6 +12,9 @@ robot_descriptions = "*"
 casadi = "*"
 numpy = "*"
 matplotlib = "*"
+# Kalman filter inside the humanoid controller (scipy.linalg.block_diag) and
+# rotation utilities in the whole-body inverse dynamics (Rotation/rotvec).
+scipy = "*"
 # QP backend for the humanoid controller (is-mpc + whole-body inverse
 # dynamics). casadi conic plugins ship in Library/bin (conda) or the package
 # dir (pip) but only load inside an activated env with that dir on the DLL

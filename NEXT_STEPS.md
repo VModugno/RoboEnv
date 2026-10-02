@@ -49,6 +49,11 @@ the stable pre-humanoid state; 4 controller tests green on all 4 OSes in CI run
 - Regression gate ALL GREEN on the final tree: smoke-test, cartesian_kin,
   cartesian_impedance, mobile_base_kin, mobile_base_arm_kin, plus the new
   humanoid walk test (26 s headless, full plan).
+- **CI humanoid walk job delivered**: `humanoid-walk` in `.github/workflows/ci.yml`
+  runs the full walk (`ROBOENV_MAX_STEPS=26000`, headless) on the 4-OS matrix,
+  25-min job timeout. Local wall-clock: 1 min 46 s on Windows. `scipy` is now
+  declared in pixi.toml (direct import by the humanoid controller KF;
+  previously transitive-only, lock unchanged).
 
 Root causes LOCKED (do not re-litigate):
 
@@ -115,7 +120,6 @@ Debug findings LOCKED (these made the walk work — see the module docstring of
 pixi run test-humanoid-walk                          # GUI, full plan
 $env:ROBOENV_HEADLESS='1'; $env:ROBOENV_MAX_STEPS='26000'
 pixi run python tests/humanoid_walk_controller.py    # headless, full plan (26 s)
-$env:ROBOENV_MAX_STEPS='5000'                        # headless, short CI-style budget
 ```
 
 The test exercises the default walk gait; pass a custom `vref` list of
@@ -124,9 +128,6 @@ The test exercises the default walk gait; pass a custom `vref` list of
 
 ## Future work
 
-- **CI humanoid job**: add a short-budget humanoid walk job (headless,
-  `ROBOENV_MAX_STEPS=5000`) to ci.yml alongside the existing 4 controller
-  tests. Runtime ~2-3 min, MPC solve ~2.5 ms/tick.
 - **GUI visual verification**: the walk is validated headless via telemetry;
   an eyes-on GUI run is still pending.
 - **KF tuning**: current R = diag(1e1, 1e2, 1e4) comes straight from the demo;
