@@ -1,16 +1,23 @@
-import numpy as np
-import time
 import os
-import matplotlib.pyplot as plt
+import time
+
+import numpy as np
+import matplotlib
+
+# headless mode and step cap, used by ci and batch runs (see tests/README.md):
+#   ROBOENV_HEADLESS=1   -> pybullet DIRECT (no gui), no per-step sleep/prints, plots skipped
+#   ROBOENV_MAX_STEPS=N  -> break the control loop after N steps (defaults to 5000 when headless)
+headless = os.environ.get("ROBOENV_HEADLESS", "").strip().lower() in ("1", "true", "yes")
+max_steps = int(os.environ.get("ROBOENV_MAX_STEPS", "5000" if headless else "0"))
+
+if headless:
+    matplotlib.use("Agg")
+
 from simulation_and_control import pb, MotorCommands, PinWrapper
+from simulation_and_control.controllers import Hrp4Controller
 
 
 def main():
-
-    #init_joint_position=[0., 0., 0., 0.,  0.,  -3.,  -25.,  50., -25.,   3.,  0.,  3., -25.,  50.,  -25.,  -3., 4.,  -8.,  0.,  -25., 4.,  8.,  0.,  -25.]
-    #convert_init_joint_position = [x * np.pi / 180. for x in init_joint_position]
-    #print("init_joint_position", convert_init_joint_position)
-    #print("len of joint_position=",len(init_joint_position))
 
     conf_file_name = "hrp4config.json"  # Configuration file for the robot
     root_dir = os.path.dirname(os.path.abspath(__file__))
@@ -19,7 +26,7 @@ def main():
     # remove current directory name from cur_dir
     root_dir = root_dir.replace(name_current_directory, "")
     # Configuration for the simulation
-    sim = pb.SimInterface(conf_file_name, conf_file_path_ext = root_dir)  # Initialize simulation interface
+    sim = pb.SimInterface(conf_file_name, conf_file_path_ext=root_dir, use_gui=not headless)
 
     # Get active joint names from the simulation
     ext_names = sim.getNameActiveJoints()
@@ -28,102 +35,54 @@ def main():
     source_names = ["pybullet"]  # Define the source for dynamic modeling
 
     # Create a dynamic model of the robot
-    dyn_model = PinWrapper(conf_file_name, "pybullet", ext_names, source_names, False,0,root_dir)
+    dyn_model = PinWrapper(conf_file_name, "pybullet", ext_names, source_names, False, 0, root_dir)
     num_joints = dyn_model.getNumberofActuatedJoints()
 
-    
+    # whole-body IS-MPC walking controller (100 Hz tick, 1 kHz sim)
+    controller = Hrp4Controller(dyn_model, sim, use_gui=not headless)
 
-    
-    # while True:
-    #     
-    #     base_pos = sim.GetBasePosition()
-    #     base_ori = sim.GetBaseOrientation()
-    #     q_mes = sim.GetMotorAngles(0)
-    #     qd_mes = sim.GetMotorVelocities(0)
-    #     # create current and desired states
-    #     self.current = self.retrieve_state()
-    #
-    #      
-        
-    #     # set acceleration commands
-    #     for i in range(self.params['dof'] - 6):
-    #         self.hrp4.setCommand(i + 6, commands[i])
+    n_motors = num_joints
+    ctrl_every = 10  # 1 kHz sim step / 100 Hz control tick
+    cmd = MotorCommands()  # Initialize command structure for motors
 
-    #     # log and plot
-    #     self.logger.log_data(self.current, self.desired)
-    #     #self.logger.update_plot()
+    current_time = 0.0
+    time_step = sim.GetTimeStep()
+    tick = 0
 
-    #     self.time += 1
+    while True:
+        # 100 Hz: retrieve state, solve MPC + whole-body ID-QP, store tau
+        tau_cmd = controller.ComputeController()
+        # the command object holds the torque until the next control tick;
+        # pybullet needs it re-applied at every simulation step
+        cmd.SetControlCmd(tau_cmd, ["torque"] * n_motors)
 
-    # def retrieve_state(self):
-    #     # com and torso pose (orientation and position)
-    #     com_position = self.hrp4.getCOM()
-    #     torso_orientation = get_rotvec(self.hrp4.getBodyNode('torso').getTransform(withRespectTo=dart.dynamics.Frame.World(), inCoordinatesOf=dart.dynamics.Frame.World()).rotation())
-    #     base_orientation  = get_rotvec(self.hrp4.getBodyNode('body' ).getTransform(withRespectTo=dart.dynamics.Frame.World(), inCoordinatesOf=dart.dynamics.Frame.World()).rotation())
+        for _ in range(ctrl_every):
+            sim.Step(cmd, "torque")  # Simulation step with torque command
+            current_time += time_step
 
-    #     # feet poses (orientation and position)
-    #     l_foot_transform = self.lsole.getTransform(withRespectTo=dart.dynamics.Frame.World(), inCoordinatesOf=dart.dynamics.Frame.World())
-    #     l_foot_orientation = get_rotvec(l_foot_transform.rotation())
-    #     l_foot_position = l_foot_transform.translation()
-    #     left_foot_pose = np.hstack((l_foot_orientation, l_foot_position))
-    #     r_foot_transform = self.rsole.getTransform(withRespectTo=dart.dynamics.Frame.World(), inCoordinatesOf=dart.dynamics.Frame.World())
-    #     r_foot_orientation = get_rotvec(r_foot_transform.rotation())
-    #     r_foot_position = r_foot_transform.translation()
-    #     right_foot_pose = np.hstack((r_foot_orientation, r_foot_position))
+        tick += 1
 
-    #     # velocities
-    #     com_velocity = self.hrp4.getCOMLinearVelocity(relativeTo=dart.dynamics.Frame.World(), inCoordinatesOf=dart.dynamics.Frame.World())
-    #     torso_angular_velocity = self.hrp4.getBodyNode('torso').getAngularVelocity(relativeTo=dart.dynamics.Frame.World(), inCoordinatesOf=dart.dynamics.Frame.World())
-    #     base_angular_velocity = self.hrp4.getBodyNode('body').getAngularVelocity(relativeTo=dart.dynamics.Frame.World(), inCoordinatesOf=dart.dynamics.Frame.World())
-    #     l_foot_spatial_velocity = self.lsole.getSpatialVelocity(relativeTo=dart.dynamics.Frame.World(), inCoordinatesOf=dart.dynamics.Frame.World())
-    #     r_foot_spatial_velocity = self.rsole.getSpatialVelocity(relativeTo=dart.dynamics.Frame.World(), inCoordinatesOf=dart.dynamics.Frame.World())
+        # Exit logic with 'q' key
+        keys = sim.GetPyBulletClient().getKeyboardEvents()
+        qKey = ord('q')
+        if qKey in keys and keys[qKey] and sim.GetPyBulletClient().KEY_WAS_TRIGGERED:
+            break
 
-    #     # compute total contact force
-    #     force = np.zeros(3)
-    #     for contact in world.getLastCollisionResult().getContacts():
-    #         force += contact.force
+        if max_steps and current_time / time_step >= max_steps:
+            print(f"Reached step cap {max_steps} at t={current_time:.2f}s")
+            break
 
-    #     # compute zmp
-    #     zmp = np.zeros(3)
-    #     zmp[2] = com_position[2] - force[2] / (self.hrp4.getMass() * self.params['g'] / self.params['h'])
-    #     for contact in world.getLastCollisionResult().getContacts():
-    #         if contact.force[2] <= 0.1: continue
-    #         zmp[0] += (contact.point[0] * contact.force[2] / force[2] + (zmp[2] - contact.point[2]) * contact.force[0] / force[2])
-    #         zmp[1] += (contact.point[1] * contact.force[2] / force[2] + (zmp[2] - contact.point[2]) * contact.force[1] / force[2])
+        if not headless:
+            time.sleep(0.01)  # Slow down the loop for better visualization
 
-    #     if force[2] <= 0.1: # threshold for when we lose contact
-    #         zmp = np.array([0., 0., 0.]) # FIXME: this should return previous measurement
-    #     else:
-    #         # sometimes we get contact points that dont make sense, so we clip the ZMP close to the robot
-    #         midpoint = (l_foot_position + l_foot_position) / 2.
-    #         zmp[0] = np.clip(zmp[0], midpoint[0] - 0.3, midpoint[0] + 0.3)
-    #         zmp[1] = np.clip(zmp[1], midpoint[1] - 0.3, midpoint[1] + 0.3)
-    #         zmp[2] = np.clip(zmp[2], midpoint[2] - 0.3, midpoint[2] + 0.3)
+    if headless:
+        print(f"Headless run finished at t={current_time:.2f}s")
+        return
 
-    #     # create state dict
-    #     return {
-    #         'lsole': {'pos': left_foot_pose,
-    #                   'vel': l_foot_spatial_velocity,
-    #                   'acc': np.zeros(6)},
-    #         'rsole': {'pos': right_foot_pose,
-    #                   'vel': r_foot_spatial_velocity,
-    #                   'acc': np.zeros(6)},
-    #         'com'  : {'pos': com_position,
-    #                   'vel': com_velocity,
-    #                   'acc': np.zeros(3)},
-    #         'torso': {'pos': torso_orientation,
-    #                   'vel': torso_angular_velocity,
-    #                   'acc': np.zeros(3)},
-    #         'base' : {'pos': base_orientation,
-    #                   'vel': base_angular_velocity,
-    #                   'acc': np.zeros(3)},
-    #         'joint': {'pos': self.hrp4.getPositions(),
-    #                   'vel': self.hrp4.getVelocities(),
-    #                   'acc': np.zeros(self.params['dof'])},
-    #         'zmp'  : {'pos': zmp,
-    #                   'vel': np.zeros(3),
-    #                   'acc': np.zeros(3)}
-    #     }
+    # live plot of the desired/current CoM and ZMP trajectories
+    controller.logger.initialize_plot() if hasattr(controller, 'logger') else None
+    controller.logger.update_plot()
+
 
 if __name__ == '__main__':
     main()
