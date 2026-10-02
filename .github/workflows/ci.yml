@@ -28,3 +28,43 @@ jobs:
 
       - name: Install environment and run import smoke test
         run: pixi run smoke-test
+
+  # Run the example controllers headless (ROBOENV_HEADLESS=1 -> pybullet DIRECT,
+  # no gui) on every supported platform.
+  controllers:
+    name: controllers (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, macos-15-intel, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: prefix-dev/setup-pixi@v0.10.1
+        with:
+          pixi-version: v0.80.0
+          cache: true
+
+      - name: cartesian kinematic controller
+        env:
+          ROBOENV_HEADLESS: "1"
+        run: pixi run test-cartesian-kin
+
+      - name: cartesian impedance controller
+        env:
+          ROBOENV_HEADLESS: "1"
+        run: pixi run test-cartesian-impedance
+
+      - name: mobile base kinematic controller
+        env:
+          ROBOENV_HEADLESS: "1"
+        run: pixi run test-mobile-base-kin
+
+      - name: mobile base + arm kinematic controller
+        env:
+          ROBOENV_HEADLESS: "1"
+        run: pixi run test-mobile-base-arm-kin
