@@ -1,6 +1,16 @@
 import numpy as np
 import time
 import os
+
+# headless mode and step cap, used by ci and batch runs (see tests/README.md):
+#   ROBOENV_HEADLESS=1   -> pybullet DIRECT (no gui), no per-step sleep/prints, plots skipped
+#   ROBOENV_MAX_STEPS=N  -> break the control loop after N steps (defaults to 5000 when headless)
+headless = os.environ.get("ROBOENV_HEADLESS", "").strip().lower() in ("1", "true", "yes")
+max_steps = int(os.environ.get("ROBOENV_MAX_STEPS", "5000" if headless else "0"))
+
+import matplotlib
+if headless:
+    matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from simulation_and_control import pb, MotorCommands, PinWrapper, feedback_lin_ctrl, SinusoidalReference, ImpedanceController
 
@@ -14,7 +24,7 @@ def main():
     # remove current directory name from cur_dir
     root_dir = root_dir.replace(name_current_directory, "")
     # Configuration for the simulation
-    sim = pb.SimInterface(conf_file_name, conf_file_path_ext = root_dir)  # Initialize simulation interface
+    sim = pb.SimInterface(conf_file_name, conf_file_path_ext = root_dir, use_gui=not headless)  # Initialize simulation interface
 
     # Get active joint names from the simulation
     ext_names = sim.getNameActiveJoints()
@@ -110,6 +120,10 @@ def main():
         qKey = ord('q')
         if qKey in keys and keys[qKey] and sim.GetPyBulletClient().KEY_WAS_TRIGGERED:
             break
+
+        if max_steps and current_time / time_step >= max_steps:
+            print(f"Reached step cap {max_steps} at t={current_time:.2f}s")
+            break
         
         #simulation_time = sim.GetTimeSinceReset()
 
@@ -121,12 +135,18 @@ def main():
         #cur_regressor = dyn_model.ComputeDyanmicRegressor(q_mes,qd_mes, qdd_est)
         #regressor_all = np.vstack((regressor_all, cur_regressor))
 
-        time.sleep(0.01)  # Slow down the loop for better visualization
+        if not headless:
+            time.sleep(0.01)  # Slow down the loop for better visualization
         # get real time
         current_time += time_step
-        print("current time in seconds",current_time)
+        if not headless:
+            print("current time in seconds",current_time)
 
     
+    if headless:
+        print(f"Headless run finished at t={current_time:.2f}s")
+        return
+
     num_joints = len(q_mes)
     for i in range(num_joints):
         plt.figure(figsize=(10, 8))

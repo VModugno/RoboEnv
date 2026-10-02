@@ -1,66 +1,27 @@
 import numpy as np
 import time
 import os
+
+# headless mode and step cap, used by ci and batch runs (see tests/README.md):
+#   ROBOENV_HEADLESS=1   -> pybullet DIRECT (no gui), no per-step sleep/prints, plots skipped
+#   ROBOENV_MAX_STEPS=N  -> break the control loop after N steps (defaults to 5000 when headless)
+headless = os.environ.get("ROBOENV_HEADLESS", "").strip().lower() in ("1", "true", "yes")
+max_steps = int(os.environ.get("ROBOENV_MAX_STEPS", "5000" if headless else "0"))
+
+import matplotlib
+if headless:
+    matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from simulation_and_control import pb, MotorCommands, PinWrapper, feedback_lin_ctrl, SinusoidalReference, CartesianDiffKin
-from simulation_and_control import differential_drive_regulation_controller
-
-def WholeBodyController(dyn_model,base_pos_,base_or_, q_, qd_, base_pos_d, base_or_d, q_d, qd_d, kp_pos, kp_ori, kp, kd):
-    """
-    Perform whole-body control on a robotic system.
-
-    Parameters:
-    - dyn_model (pin_wrapper): The dynamics model of the robot encapsulated within a 'pin_wrapper' object,
-                               which provides methods for computing robot dynamics such as mass matrices,
-                               Coriolis forces, etc.
-    - q_ (numpy.ndarray): Measured positions of the robot's joints, indicating the current actual positions
-                          as measured by sensors or estimated by observers.
-    - qd_ (numpy.ndarray): Measured velocities of the robot's joints, reflecting the current actual velocities.
-    - q_d (numpy.ndarray): Desired positions for the robot's joints set by a trajectory generator or a higher-level
-                           controller, dictating target positions.
-    - qd_d (numpy.ndarray): Desired velocities for the robot's joints, specifying the rate at which the joints
-                            should move towards their target positions.
-    - kp_pos (float): Proportional gain for position control, adjusting the response to position error.
-    - kp_ori (float): Proportional gain for orientation control, adjusting the response to orientation error.
-    - kp (float or numpy.ndarray): Proportional gain(s) for the control system, which can be a uniform value across
-                                   all joints or unique for each joint, adjusting the response to position error.
-    - kd (float or numpy.ndarray): Derivative gain(s), similar to kp, affecting the response to velocity error and
-                                   aiding in system stabilization by damping oscillations.
-
-    Returns:
-    None
-
-    This function computes the control inputs necessary to achieve desired joint positions and velocities by
-    applying whole-body control, using the robot's dynamic model to appropriately compensate for its
-    inherent dynamics. The control law implemented typically combines proportional-derivative (PD) control
-    with dynamic compensation to achieve precise and stable motion.
-    """
-    # Command and control loop
-    cmd = MotorCommands()  # Initialize command structure for motors
-    wheel_radius = 0.1
-    wheel_base_width = 0.5
-
-    # i need to convert from quaternion to bearing (yaw)
-    base_bearing_ = pb.QuaternionToEuler(base_or_)[2]
-    base_bearing_d = pb.QuaternionToEuler(base_or_d)[2]
-
-    # remove from the joint positions and velocity the wheels joints
-    q_robot = q_[4:]
-    qd_robot = qd_[4:]
-    q_wheels = q_d[:4]
-    qd_wheels = q_d[:4]
+import pinocchio as pin
+from simulation_and_control import pb, MotorCommands, PinWrapper, SinusoidalReference, CartesianDiffKin
+from simulation_and_control import differential_drive_controller_adjusting_bearing
 
 
-    angular_wheels_velocity = differential_drive_regulation_controller(base_pos_,base_bearing_,base_pos_d,base_bearing_d,wheel_radius,wheel_base_width, kp_pos, kp_ori)
-    
-    torque_joints = feedback_lin_ctrl(dyn_model, q_, qd_, q_d, qd_d, kp, kd)
-    # all torques
-    cmd_all = np.concatenate((angular_wheels_velocity,torque_joints))
-    interface_all_wheels= ["velocity","velocity","velocity","velocity"]
-    interface_all_joints = ["torque"]*13
-    interface_all = interface_all_wheels + interface_all_joints
-    cmd.setCommand(cmd_all,interface_all)
-    return cmd
+def quaternion2bearing(q_w, q_x, q_y, q_z):
+    quat = pin.Quaternion(q_w, q_x, q_y, q_z)
+    quat.normalize()
+    base_euler = pin.rpy.matrixToRpy(quat.toRotationMatrix())
+    return base_euler[2]
    
 
 def main():
@@ -71,7 +32,7 @@ def main():
     name_current_directory = "tests"
     # remove current directory name from cur_dir
     root_dir = root_dir.replace(name_current_directory, "")
-    sim = pb.SimInterface(conf_file_name, conf_file_path_ext = root_dir)  # Initialize simulation interface
+    sim = pb.SimInterface(conf_file_name, conf_file_path_ext = root_dir, use_gui=not headless)  # Initialize simulation interface
 
     # Get active joint names from the simulation
     ext_names = sim.getNameActiveJoints()
@@ -102,33 +63,51 @@ def main():
     
     print(f"joint vel limits: {joint_vel_limits}")
     
-
     # fixed initial position
     des_base_pos = np.array([0.5, 0.5, 0.0])
     des_base_ori = np.array([0.0, 0.0, 0.0, 1.0])
-    joint_des_angles = np.array([0.000, 0.000, 0.0000, 0.0000, 0.0, 1.57, 0.0, 1.0, 0.0, 1.0, 0.0,0.1,0.1,0.1,0.1,0.1,0.1])
-    q_des = np.concatenate((des_base_pos, des_base_ori, joint_des_angles))
-    des_base_lin_vel = np.array([0.0, 0.0, 0.0])
-    des_base_ang_vel = np.array([0.0, 0.0, 0.0])
-    qd_des_clip = np.concatenate((des_base_lin_vel, des_base_ang_vel, np.zeros(num_joints)))
+    # desired actuated joint values: 4 wheels first, then arm/hand (17 total).
+    # hold the arm/hand at its measured initial posture while the base drives;
+    # continuous joints report 0/-1 limit sentinels and are skipped, but joints
+    # spawned outside a real urdf limit fight the limit constraint and stall
+    # the base, so they are clamped inside
+    q_des = init_joint_angles.copy()
+    for i in range(len(q_des)):
+        if lower_limits[i] < upper_limits[i]:
+            q_des[i] = np.clip(q_des[i], lower_limits[i], upper_limits[i])
 
     #simulation_time = sim.GetTimeSinceReset()
     time_step = sim.GetTimeStep()
     current_time = 0
-    
-    
-    # P conttroller high level
-    kp_pos = 100 # position 
-    kp_ori = 0   # orientation
-    
-    # PD controller gains low level (feedbacklingain)
-    kp = 1000
-    kd = 100
+
+    # gains proven in mobile_base_kinematic_controller
+    kp_pos = 1.0  # position
+    kp_ori = 10    # orientation
+
+    # gains capped by discrete-time stability: kd * time_step / inertia < 2
+    # on the lightest arm links (~5e-3 kg m^2); higher gains or any gain on
+    # the 0.01 kg finger links (inertia ~1e-5) explode the sim and flip the
+    # robot, so the 6 finger joints are left unactuated
+    kp = 300
+    kd = 15
+
+    # summit_xl wheel geometry, same values as mobile_base_kinematic_controller
+    wheel_radius = 0.11
+    wheel_base_width = 0.46
 
     # Initialize data storage
     q_mes_all, qd_mes_all, q_d_all, qd_d_all,  = [], [], [], []
     base_pos_all, base_ori_all = [], []
-    
+
+    # drive the base to a nearby waypoint on the initial heading, like
+    # mobile_base_kinematic_controller does, so the arm rides a moving base
+    waypoints = [
+        {'pos': np.array([0.5, 0.0, 0.0]), 'bearing': 0.0},
+    ]
+
+    current_waypoint_index = 0
+    num_waypoints = len(waypoints)
+
     # data collection loop
     while True:
         # measure current state
@@ -136,27 +115,42 @@ def main():
         base_ori = sim.GetBaseOrientation()
         q_mes = sim.GetMotorAngles(0)
         qd_mes = sim.GetMotorVelocities(0)
-        qdd_est = sim.ComputeMotorAccelerationTMinusOne(0)
-        # Compute sinusoidal reference trajectory
-        # Ensure q_init is within the range of the amplitude
-        
-        
-        # Control command
-        #
-        sim.Step(cmd,"torque")  # Simulation step with torque command
 
-        #if dyn_model.visualizer: 
-        #    for index in range(len(sim.bot)): # Conditionally display the robot model
-        #        q = sim.GetMotorAngles(index)
-        #        dyn_model.DisplayModel(q)  # Update the display of the robot model
+        cmd = MotorCommands()
+        if current_waypoint_index < num_waypoints:
+            des_base_pos = waypoints[current_waypoint_index]['pos']
+            des_base_bearing = waypoints[current_waypoint_index]['bearing']
+            base_bearing_ = quaternion2bearing(base_ori[3], base_ori[0], base_ori[1], base_ori[2])
+
+            left_wheel_velocity, right_wheel_velocity, at_goal = differential_drive_controller_adjusting_bearing(
+                base_pos, base_bearing_, des_base_pos, des_base_bearing,
+                wheel_radius, wheel_base_width, kp_pos, kp_ori
+            )
+            # active wheel order: front_right, front_left, back_left, back_right
+            wheel_cmds = np.array([right_wheel_velocity, left_wheel_velocity, left_wheel_velocity, right_wheel_velocity])
+            torque_joints = np.zeros(13)
+            torque_joints[0:7] = kp * (q_des[4:11] - q_mes[4:11]) - kd * qd_mes[4:11]
+            cmd_all = np.concatenate((wheel_cmds, torque_joints))
+            cmd.SetControlCmd(cmd_all, ["velocity"] * 4 + ["torque"] * 13)
+
+            if at_goal:
+                print(f"Reached waypoint {current_waypoint_index + 1} at t={current_time:.2f}s")
+                current_waypoint_index += 1
+        else:
+            print("Completed all waypoints. Base navigation finished.")
+            break
+
+        sim.Step(cmd, "torque")
 
         # Exit logic with 'q' key
         keys = sim.GetPyBulletClient().getKeyboardEvents()
         qKey = ord('q')
         if qKey in keys and keys[qKey] and sim.GetPyBulletClient().KEY_WAS_TRIGGERED:
             break
-        
-        #simulation_time = sim.GetTimeSinceReset()
+
+        if max_steps and current_time / time_step >= max_steps:
+            print(f"Reached step cap {max_steps} at t={current_time:.2f}s")
+            break
 
         # Store data for plotting
         base_pos_all.append(base_pos)
@@ -164,16 +158,21 @@ def main():
         q_mes_all.append(q_mes)
         qd_mes_all.append(qd_mes)
         q_d_all.append(q_des)
-        qd_d_all.append(qd_des_clip)
-        #cur_regressor = dyn_model.ComputeDyanmicRegressor(q_mes,qd_mes, qdd_est)
-        #regressor_all = np.vstack((regressor_all, cur_regressor))
+        qd_d_all.append(np.zeros(num_joints))
 
-        time.sleep(0.01)  # Slow down the loop for better visualization
-        # get real time
+        if np.linalg.norm(base_pos[:2] - des_base_pos[:2]) < 0.06:
+            print(f"Reached the desired base position at t={current_time:.2f}s")
+            break
+
+        if not headless:
+            time.sleep(0.01)  # Slow down the loop for better visualization
         current_time += time_step
-        print("current time in seconds",current_time)
 
     
+    if headless:
+        print(f"Headless run finished at t={current_time:.2f}s")
+        return
+
     num_joints = len(q_mes)
     for i in range(num_joints):
         plt.figure(figsize=(10, 8))
