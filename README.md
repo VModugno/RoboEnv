@@ -27,6 +27,7 @@ curl -fsSL https://pixi.sh/install.sh | sh
 ```
 
 Install uv with:
+
 ```bash
 # Windows (PowerShell)
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
@@ -66,12 +67,25 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
    You should see `simulation_and_control OK`.
 
+4. **Use (activate) the pixi environment in the labs workspace**
+
+```bash
+cd <path-to-this-repo>
+
+pixi shell
+
+cd <path-to-your-labs-folder>
+```
+
+Note: You will need to do the above activation steps every time you start a new terminal.
 
 ### Setup (Using uv)
+
 1. Create and activate a Python environment
+
 ```bash
-# Go to your workspace folder. For example, cd to a lab folder.
-cd <path-to-workspace>
+# Go to your labs folder.
+cd <path-to-labs>
 
 # Create a python environment using uv
 uv venv -p 3.10
@@ -81,8 +95,20 @@ source .venv/bin/activate
 ```
 
 2. Install this repo as a package
+
 ```bash
+# MacOS
+CFLAGS='-Dfdopen=fdopen' uv pip install 'pybullet==3.2.7'
 uv pip install <path-to-this-repo>
+
+# Linux / Windows
+uv pip install <path-to-this-repo>
+```
+
+3. Verify the install
+
+```bash
+python -c "import numpy, pinocchio, pybullet, casadi, matplotlib, robot_descriptions, simulation_and_control; print('simulation_and_control OK')"
 ```
 
 ## Usage
@@ -100,6 +126,7 @@ pixi run test-mobile-base-arm-kin
 ```
 
 ### Run the example scripts (if you installed with uv)
+
 ```bash
 test-cartesian-kin
 test-cartesian-impedance

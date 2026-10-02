@@ -6,3 +6,7 @@
 .omo/
 
 build
+
+roboenv.egg-info
+
+__pycache__
