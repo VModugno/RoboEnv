@@ -17,6 +17,12 @@ matplotlib = "*"
 [pypi-dependencies]
 simulation_and_control = { path = "./simulation_and_control", editable = true }
 
+# Force OpenBLAS on Windows: the default MKL variant crashes inside
+# numpy.linalg (delay-load of MKL's OpenMP runtime fails outside an
+# activated shell). See README troubleshooting for details.
+[target.win-64.dependencies]
+libblas = { version = "*", build = "*openblas*" }
+
 [tasks]
 
 # --- test / example scripts -------------------------------------------------
@@ -28,4 +34,6 @@ test-mobile-base-arm-kin = "python tests/mobile_base_arm_kinematic_controller.py
 
 # --- helpers -----------------------------------------------------------------
 # Quick check that the environment and the editable submodule import correctly.
-smoke-test = "python -c \"import numpy, pinocchio, pybullet, casadi, matplotlib, robot_descriptions, simulation_and_control; print('simulation_and_control OK')\""
+# The numpy.linalg.pinv call also exercises the BLAS/LAPACK backend, which has
+# crashed (native DLL delay-load) on Windows with the MKL variant.
+smoke-test = "python -c \"import numpy, pinocchio, pybullet, casadi, matplotlib, robot_descriptions, simulation_and_control; numpy.linalg.pinv(numpy.eye(3)); print('simulation_and_control OK')\""
