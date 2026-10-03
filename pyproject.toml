@@ -16,6 +16,7 @@ dependencies = [
     "casadi",
     "matplotlib",
     "scipy",
+    "osqp"
 ]
 
 [project.scripts]
