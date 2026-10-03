@@ -61,6 +61,7 @@ test-cartesian-impedance = "python tests/cartesian_impedance_controller.py"
 test-humanoid-walk = "python tests/humanoid_walk_controller.py"
 test-mobile-base-kin = "python tests/mobile_base_kinematic_controller.py"
 test-mobile-base-arm-kin = "python tests/mobile_base_arm_kinematic_controller.py"
+test-eye-in-hand = "python tests/eye_in_hand_camera.py"
 
 # --- helpers -----------------------------------------------------------------
 # Quick check that the environment and the editable submodule import correctly.

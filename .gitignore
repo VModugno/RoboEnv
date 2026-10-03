@@ -10,3 +10,6 @@ build
 roboenv.egg-info
 
 __pycache__
+
+# camera frames written by tests/eye_in_hand_camera.py
+tests/eye_in_hand_frames/

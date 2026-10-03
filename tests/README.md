@@ -31,4 +31,5 @@ The scripts read two environment variables:
 | `cartesian_impedance_controller.py` | works (`ImpedanceController` ported from the `legged_robots` branch) |
 | `mobile_base_kinematic_controller.py` | works (implicit-cylinder wheels + compliant wheel contacts + anisotropic friction along the wheel axle for skid-steer turns) |
 | `mobile_base_arm_kinematic_controller.py` | works (arm posture pd gains sized for the 1 ms timestep, fingers left unactuated, wheel joint commands wired through `MotorCommands`) |
+| `eye_in_hand_camera.py` | works (`SimInterface` camera methods: offscreen rendering from a generic world camera and from a camera mounted on a robot link; frames are saved to `tests/eye_in_hand_frames/` while the arm tracks a sinusoidal cartesian reference) |
 | `humanoid_walk_controller.py` | parked: needs the `legged_robots` submodule branch (config format + controller rework), not propagated to main |
