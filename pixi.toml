@@ -20,10 +20,32 @@ scipy = "*"
 # dir (pip) but only load inside an activated env with that dir on the DLL
 # search path; osqp is the portable fallback the QPSolver probes down to.
 osqp = "*"
+# Bayesian optimization (scikit-optimize's gp_minimize) used by lab exercises.
+scikit-optimize = ">=0.10.2,<0.11"
 
 # The git submodule is installed editable into the pixi environment.
 [pypi-dependencies]
 simulation_and_control = { path = "./simulation_and_control", editable = true }
+
+# --- machine-learning environment (ml) ----------------------------------------
+# torch/torchvision cannot live in the default environment: conda-forge
+# pytorch only ships CUDA or MKL-linked builds (conflicting with our OpenBLAS
+# pin on win-64), and the PyPI wheels have no CPython 3.14 osx-64 build. The
+# wheels therefore live in a separate `ml` environment restricted to the
+# platforms that actually ship cp314 wheels; the default feature (numpy,
+# matplotlib, ...) is inherited automatically.
+[feature.ml.pypi-dependencies]
+torch = "*"
+torchvision = "*"
+
+# torch (PyPI wheel) ships its own Intel OpenMP runtime (libiomp5md.dll) which
+# collides with conda-forge's libomp.dll loaded by numpy on Windows. Allow the
+# duplicate runtime in the ml environment only.
+[feature.ml.activation.env]
+KMP_DUPLICATE_LIB_OK = "TRUE"
+
+[environments]
+ml = { features = ["ml"], platforms = ["win-64", "linux-64", "osx-arm64"] }
 
 # Force OpenBLAS on Windows: the default MKL variant crashes inside
 # numpy.linalg (delay-load of MKL's OpenMP runtime fails outside an
